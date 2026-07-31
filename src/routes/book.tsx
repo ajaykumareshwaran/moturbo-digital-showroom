@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/book")({
   validateSearch: (search: Record<string, unknown>) => ({
-    service: typeof search.service === "string" ? search.service : undefined,
+    service: typeof search["service"] === "string" ? (search["service"] as string) : undefined,
   }),
   head: () => ({
     meta: [
@@ -34,17 +34,17 @@ function BookPage() {
   const { service: preset } = Route.useSearch();
   const { addBooking } = useStore();
   const [step, setStep] = useState(0);
-  const [service, setService] = useState(preset ?? SERVICES[0].slug);
-  const [brand, setBrand] = useState(VEHICLE_BRANDS[0]);
+  const [service, setService] = useState(preset ?? SERVICES[0]!.slug);
+  const [brand, setBrand] = useState(VEHICLE_BRANDS[0]!);
   const [model, setModel] = useState("");
-  const [branch, setBranch] = useState(BRANCHES[0].name);
+  const [branch, setBranch] = useState(BRANCHES[0]!.name);
   const [date, setDate] = useState("");
-  const [time, setTime] = useState(TIMES[2]);
+  const [time, setTime] = useState(TIMES[2]!);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState<string | null>(null);
 
-  const chosen = SERVICES.find((s) => s.slug === service)!;
+  const chosen = SERVICES.find((s) => s.slug === service) ?? SERVICES[0]!;
   const canNext = step === 1 ? model.trim().length > 1 : step === 2 ? date !== "" : true;
 
   function confirm() {
@@ -170,7 +170,7 @@ function BookPage() {
                         <select value={branch} onChange={(e) => setBranch(e.target.value)} className="input-lux">
                           {BRANCHES.map((b) => (
                             <option key={b.name} value={b.name} className="bg-noir">
-                              {b.name} — {b.city}
+                              {b.name} — {b.address}
                             </option>
                           ))}
                         </select>
