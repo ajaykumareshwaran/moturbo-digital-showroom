@@ -11,6 +11,13 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { StoreProvider } from "@/context/StoreContext";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { MiniCart } from "@/components/MiniCart";
+import { Preloader } from "@/components/Preloader";
+import { SmoothScroll } from "@/components/SmoothScroll";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,16 +84,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MOTURBO — Luxury Automotive Studio" },
+      {
+        name: "description",
+        content:
+          "MOTURBO is a flagship automotive detailing, customization and accessories studio. Ceramic coating, PPF, wrapping and an atelier product line.",
+      },
+      { name: "author", content: "MOTURBO" },
+      { property: "og:title", content: "MOTURBO — Luxury Automotive Studio" },
+      {
+        property: "og:description",
+        content: "Step inside the MOTURBO flagship showroom: detailing, protection and bespoke automotive craft.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@moturbo" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -119,8 +139,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <StoreProvider>
+        <SmoothScroll />
+        <Preloader />
+        <Navbar />
+        <MiniCart />
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <main className="relative">
+          <Outlet />
+        </main>
+        <Footer />
+        <Toaster position="bottom-right" />
+      </StoreProvider>
     </QueryClientProvider>
   );
 }
