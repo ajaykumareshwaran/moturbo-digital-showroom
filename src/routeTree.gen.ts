@@ -18,6 +18,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 
@@ -66,6 +67,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopIndexRoute = ShopIndexRouteImport.update({
   id: '/shop/',
   path: '/shop/',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
+  '/wishlist': typeof WishlistRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
+  '/wishlist': typeof WishlistRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop': typeof ShopIndexRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
+  '/wishlist': typeof WishlistRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/gallery'
     | '/services'
+    | '/wishlist'
     | '/shop/$slug'
     | '/shop/'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/gallery'
     | '/services'
+    | '/wishlist'
     | '/shop/$slug'
     | '/shop'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/gallery'
     | '/services'
+    | '/wishlist'
     | '/shop/$slug'
     | '/shop/'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
   ServicesRoute: typeof ServicesRoute
+  WishlistRoute: typeof WishlistRoute
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
 }
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop/': {
       id: '/shop/'
       path: '/shop'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
   ServicesRoute: ServicesRoute,
+  WishlistRoute: WishlistRoute,
   ShopSlugRoute: ShopSlugRoute,
   ShopIndexRoute: ShopIndexRoute,
 }
