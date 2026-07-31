@@ -48,9 +48,16 @@ function BookPage() {
   const canNext = step === 1 ? model.trim().length > 1 : step === 2 ? date !== "" : true;
 
   function confirm() {
-    const ref = `MTB-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    addBooking({ ref, service: chosen.name, vehicle: `${brand} ${model}`, branch, date, time, name, phone });
-    setDone(ref);
+    const created = addBooking({
+      service: chosen.name,
+      package: chosen.name,
+      vehicle: `${brand} ${model}`,
+      branch,
+      date,
+      time,
+      total: chosen.from,
+    });
+    setDone(created.id);
     toast.success("Bay reserved");
   }
 
