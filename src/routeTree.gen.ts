@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
@@ -43,6 +44,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/book': typeof BookRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/book': typeof BookRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop': typeof ShopIndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/book': typeof BookRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/gallery': typeof GalleryRoute
   '/services': typeof ServicesRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/cart'
     | '/checkout'
+    | '/gallery'
     | '/services'
     | '/shop/$slug'
     | '/shop/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/cart'
     | '/checkout'
+    | '/gallery'
     | '/services'
     | '/shop/$slug'
     | '/shop'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/cart'
     | '/checkout'
+    | '/gallery'
     | '/services'
     | '/shop/$slug'
     | '/shop/'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   BookRoute: typeof BookRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  GalleryRoute: typeof GalleryRoute
   ServicesRoute: typeof ServicesRoute
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookRoute: BookRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  GalleryRoute: GalleryRoute,
   ServicesRoute: ServicesRoute,
   ShopSlugRoute: ShopSlugRoute,
   ShopIndexRoute: ShopIndexRoute,
