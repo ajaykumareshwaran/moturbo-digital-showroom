@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Heart, Minus, Plus, Scale, Star, Truck, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { PRODUCTS, currency } from "@/data/catalog";
+import { PRODUCTS, currency, type Product } from "@/data/catalog";
 import { ProductOrb } from "@/components/ProductOrb";
 import { ProductCard } from "@/components/ProductCard";
 import { LuxButton, Magnetic, Reveal, TiltCard } from "@/components/lux";
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/shop/$slug")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product } = Route.useLoaderData() as { product: Product };
   const { addToCart, toggleWishlist, wishlist, toggleCompare, markViewed } = useStore();
   const [qty, setQty] = useState(1);
   const wished = wishlist.includes(product.slug);
