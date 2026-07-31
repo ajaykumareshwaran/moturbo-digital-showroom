@@ -84,14 +84,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MOTURBO — Luxury Automotive Studio" },
+      {
+        name: "description",
+        content:
+          "MOTURBO is a flagship automotive detailing, customization and accessories studio. Ceramic coating, PPF, wrapping and an atelier product line.",
+      },
+      { name: "author", content: "MOTURBO" },
+      { property: "og:title", content: "MOTURBO — Luxury Automotive Studio" },
+      {
+        property: "og:description",
+        content: "Step inside the MOTURBO flagship showroom: detailing, protection and bespoke automotive craft.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@moturbo" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
