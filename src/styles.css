@@ -185,6 +185,27 @@
     border-color: var(--color-border);
   }
 
+  .input-lux {
+    width: 100%;
+    border-radius: 0.9rem;
+    border: 1px solid color-mix(in oklab, white 10%, transparent);
+    background: color-mix(in oklab, white 4%, transparent);
+    padding: 0.85rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground);
+    outline: none;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .input-lux::placeholder {
+    color: var(--color-muted-foreground);
+  }
+
+  .input-lux:focus {
+    border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 10%, transparent);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
