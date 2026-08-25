@@ -170,9 +170,54 @@ function Index() {
         {CHAPTERS.map((c, i) => (
           <div
             key={c.title}
-            className={`flex h-screen items-center px-6 ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+            className={`relative flex h-screen items-center px-6 ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
           >
-            <Reveal className="glass-strong lux-border w-full max-w-md rounded-3xl p-8" y={40}>
+            {/* Chapter 08: brand banner on the left */}
+            {i === CHAPTERS.length - 1 && (
+              <Reveal
+                className="absolute left-6 top-1/2 w-[42%] -translate-y-1/2"
+                y={30}
+                delay={0.1}
+              >
+                <div className="glass-strong lux-border rounded-3xl p-8 flex flex-col gap-6">
+                  {/* Logo mark */}
+                  <div className="flex items-center gap-3">
+                    <img src="/moturbo_lg.png" alt="MOTURBO" className="h-12 w-12 object-contain" style={{ mixBlendMode: "screen" }} />
+                    <div>
+                      <div className="font-display text-xs font-black tracking-[0.32em] text-chrome">MOTURBO</div>
+                      <div className="font-display text-[0.55rem] tracking-[0.22em] text-gold uppercase">Precision · Passion · Performance</div>
+                    </div>
+                  </div>
+
+                  <div className="hairline w-full" />
+
+                  {/* Services pills */}
+                  <div>
+                    <div className="eyebrow mb-3">What we do</div>
+                    <div className="flex flex-wrap gap-2">
+                      {["Ceramic Coating", "Paint Correction", "PPF", "Wrapping", "Window Tinting", "Wheel Refinishing", "Interior Detailing", "Accessories"].map((tag) => (
+                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-display text-[0.58rem] tracking-[0.14em] text-silver uppercase">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="hairline w-full" />
+
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    {[["1000+", "Vehicles"], ["13", "Disciplines"], ["1", "Branch Currently"]].map(([val, label]) => (
+                      <div key={label}>
+                        <div className="font-display text-xl font-bold text-gold">{val}</div>
+                        <div className="mt-0.5 font-display text-[0.52rem] tracking-[0.18em] text-muted-foreground uppercase">{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            )}
+            <Reveal className="glass-strong lux-border relative z-10 w-full max-w-md rounded-3xl p-8" y={40}>
               <div className="eyebrow">{c.eyebrow}</div>
               <h2 className="mt-4 text-3xl leading-tight font-semibold">{c.title}</h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
@@ -183,7 +228,7 @@ function Index() {
       </section>
 
       {/* ---------- Marquee ---------- */}
-      <div className="relative overflow-hidden border-y border-white/8 bg-noir/60 py-5 backdrop-blur-xl">
+      <div className="relative overflow-hidden border-y border-white/8 bg-white py-5">
         <div className="animate-marquee flex w-max gap-10 whitespace-nowrap">
           {Array.from({ length: 2 }).map((_, k) => (
             <div key={k} className="flex gap-10">
@@ -197,9 +242,9 @@ function Index() {
               ].map((t) => (
                 <span
                   key={t}
-                  className="font-display text-sm tracking-[0.3em] text-muted-foreground uppercase"
+                  className="font-display text-sm tracking-[0.3em] text-neutral-800 uppercase"
                 >
-                  {t} <span className="text-gold">✦</span>
+                  {t} <span className="text-amber-500">✦</span>
                 </span>
               ))}
             </div>
@@ -265,10 +310,10 @@ function Index() {
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["12,400+", "Vehicles finished"],
+            ["1000+", "Vehicles finished"],
             ["13", "Studio disciplines"],
             ["4.9/5", "Client rating"],
-            ["3", "Flagship branches"],
+            ["1", "Flagship branch currently"],
           ].map(([v, l], i) => (
             <Reveal key={l} delay={i * 0.07}>
               <TiltCard className="glass lux-border h-full rounded-3xl p-8 text-center">
@@ -292,18 +337,18 @@ function Index() {
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
           {[
             [
-              "The ceramic work on my GT3 is the best I've seen anywhere in Europe.",
-              "Julien R.",
+              "The ceramic work on my GT3 is the best I've seen anywhere in Bangalore.",
+              "Aravind R.",
               "Porsche 911 GT3",
             ],
             [
               "They wrapped a hypercar in satin without a single relief cut. Surgical.",
-              "Amara K.",
-              "Lamborghini Revuelto",
+              "Jeevan",
+              "Lamborghini",
             ],
             [
-              "Concierge collection, live progress photos, flawless finish. Effortless.",
-              "Idris M.",
+              "Dope collection, live progress photos, flawless finish. Effortless.",
+              "Vishnu Raj",
               "Range Rover SV",
             ],
           ].map(([quote, name, car], i) => (
