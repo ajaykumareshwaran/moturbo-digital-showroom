@@ -12,7 +12,7 @@ const LINKS = [
   { to: "/shop", label: "Shop" },
   { to: "/gallery", label: "Gallery" },
   { to: "/about", label: "Studio" },
-  { to: "/journal", label: "Journal" },
+  { to: "/blog", label: "Journal" },
   { to: "/contact", label: "Contact" },
 ] as const;
 
@@ -44,10 +44,15 @@ export function Navbar() {
           )}
         >
           <Link to="/" className="mr-auto flex items-center gap-2.5">
-            <span className="relative grid size-8 place-items-center rounded-lg" style={{ backgroundImage: "var(--gradient-royal)" }}>
+            <span
+              className="relative grid size-8 place-items-center rounded-lg"
+              style={{ backgroundImage: "var(--gradient-royal)" }}
+            >
               <span className="font-display text-[0.7rem] font-black text-gold-soft">M</span>
             </span>
-            <span className="font-display text-sm font-extrabold tracking-[0.34em] text-chrome">MOTURBO</span>
+            <span className="font-display text-sm font-extrabold tracking-[0.34em] text-chrome">
+              MOTURBO
+            </span>
           </Link>
 
           <div className="hidden items-center gap-1 lg:flex">
@@ -121,7 +126,10 @@ export function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Link to={l.to} className="block border-b border-white/5 py-4 font-display text-2xl font-semibold">
+                  <Link
+                    to={l.to}
+                    className="block border-b border-white/5 py-4 font-display text-2xl font-semibold"
+                  >
                     {l.label}
                   </Link>
                 </motion.div>

@@ -80,7 +80,7 @@ export function Footer() {
                 ["/book", "Book Appointment"],
                 ["/gallery", "Gallery"],
                 ["/about", "Studio"],
-                ["/journal", "Journal"],
+                ["/blog", "Journal"],
                 ["/track", "Order Tracking"],
               ].map(([to, label]) => (
                 <li key={to}>
@@ -109,10 +109,10 @@ export function Footer() {
             <div className="eyebrow">Studio</div>
             <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
               <li className="flex gap-2.5">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-gold/70" /> Marina Tower, Downtown
+                <MapPin className="mt-0.5 size-4 shrink-0 text-gold/70" /> MG Road, Bengaluru
               </li>
               <li className="flex gap-2.5">
-                <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +1 (555) 019-4420
+                <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +91 98765 43210
               </li>
               <li className="flex gap-2.5">
                 <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> atelier@moturbo.com

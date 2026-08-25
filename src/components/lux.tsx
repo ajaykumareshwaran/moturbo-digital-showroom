@@ -34,18 +34,30 @@ export function Reveal({
 export function Magnetic({ children, strength = 18 }: { children: ReactNode; strength?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
+  
+  const updatePos = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = ref.current!.getBoundingClientRect();
+    setPos({
+      x: ((e.clientX - r.left) / r.width - 0.5) * strength,
+      y: ((e.clientY - r.top) / r.height - 0.5) * strength,
+    });
+  };
+  
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => updatePos(e));
+  };
+  
   return (
     <motion.div
       ref={ref}
       className="inline-block"
-      onMouseMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        setPos({
-          x: ((e.clientX - r.left) / r.width - 0.5) * strength,
-          y: ((e.clientY - r.top) / r.height - 0.5) * strength,
-        });
+      onMouseMove={onMouseMove}
+      onMouseLeave={() => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        setPos({ x: 0, y: 0 });
       }}
-      onMouseLeave={() => setPos({ x: 0, y: 0 })}
       animate={{ x: pos.x, y: pos.y }}
       transition={{ type: "spring", stiffness: 220, damping: 18, mass: 0.4 }}
     >

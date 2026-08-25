@@ -1,60 +1,50 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX } from "lucide-react";
 
 export function Preloader() {
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
-  const [sound, setSound] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem("moturbo.entered")) {
-      setDone(true);
-      return;
-    }
     document.body.style.overflow = "hidden";
+
+    let pageLoaded = document.readyState === "complete";
+    let finished = false;
+
+    const onPageLoad = () => {
+      pageLoaded = true;
+    };
+
+    if (!pageLoaded) {
+      window.addEventListener("load", onPageLoad, { once: true });
+    }
+
     let v = 0;
-    const id = setInterval(() => {
-      v = Math.min(100, v + Math.random() * 9 + 3);
+    const id = window.setInterval(() => {
+      // Keep shutter travel smooth, while finishing promptly when ready.
+      const step = pageLoaded ? 10 : Math.random() * 6 + 3;
+      v = Math.min(100, v + step);
       setProgress(Math.round(v));
-      if (v >= 100) {
+
+      if (v >= 100 && !finished) {
+        finished = true;
         clearInterval(id);
-        setTimeout(() => {
-          sessionStorage.setItem("moturbo.entered", "1");
+        // Small pause so the user sees the fully-open shutter before fade-out
+        window.setTimeout(() => {
           setDone(true);
-        }, 700);
+        }, 320);
       }
-    }, 120);
-    return () => clearInterval(id);
+    }, 65);
+
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("load", onPageLoad);
+    };
   }, []);
 
   useEffect(() => {
     if (done) document.body.style.overflow = "";
   }, [done]);
-
-  const playChime = () => {
-    setSound((s) => !s);
-    if (sound) return;
-    try {
-      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = new Ctx();
-      const now = ctx.currentTime;
-      [220, 330, 494].forEach((f, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = "sine";
-        o.frequency.value = f;
-        g.gain.setValueAtTime(0, now + i * 0.12);
-        g.gain.linearRampToValueAtTime(0.12, now + i * 0.12 + 0.05);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 1.4);
-        o.connect(g).connect(ctx.destination);
-        o.start(now + i * 0.12);
-        o.stop(now + i * 0.12 + 1.5);
-      });
-    } catch {
-      /* audio unavailable */
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -62,9 +52,8 @@ export function Preloader() {
         <motion.div
           className="fixed inset-0 z-[200] overflow-hidden"
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, delay: 1.1 }}
+          transition={{ duration: 0.6, delay: 0 }}
         >
-          {/* purple light behind the shutter */}
           <div className="absolute inset-0 bg-noir">
             <div className="absolute inset-0 spotlight" />
             <div className="absolute left-1/2 top-1/2 h-[46vh] w-[46vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-royal/25 blur-[120px]" />
@@ -78,29 +67,32 @@ export function Preloader() {
               >
                 MOTURBO
               </motion.div>
+
               <div className="eyebrow">Luxury Automotive Studio</div>
+
               <div className="relative h-[2px] w-56 overflow-hidden rounded-full bg-white/10 sm:w-72">
                 <div
                   className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-200"
-                  style={{ width: `${progress}%`, backgroundImage: "var(--gradient-gold)", boxShadow: "var(--shadow-gold)" }}
+                  style={{
+                    width: `${progress}%`,
+                    backgroundImage: "var(--gradient-gold)",
+                    boxShadow: "var(--shadow-gold)",
+                  }}
                 />
               </div>
+
               <div className="font-display text-xs tracking-[0.5em] text-muted-foreground">
                 {String(progress).padStart(3, "0")}
               </div>
-              <button
-                onClick={playChime}
-                className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-[0.65rem] tracking-[0.28em] text-muted-foreground uppercase transition-colors hover:text-gold-soft"
-              >
-                {sound ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-                Startup sound
-              </button>
+
+              <div className="font-display text-[0.62rem] tracking-[0.38em] text-muted-foreground uppercase">
+                Loading the showroom
+              </div>
             </div>
           </div>
 
-          {/* metallic shutter panels */}
           {[0, 1].map((i) => (
-            <motion.div
+            <div
               key={i}
               className="absolute inset-x-0 h-1/2"
               style={{
@@ -108,10 +100,9 @@ export function Preloader() {
                 backgroundImage: "var(--gradient-metal)",
                 backgroundSize: "100% 14px",
                 boxShadow: "0 0 60px oklch(0 0 0 / 80%)",
+                transform: `translateY(${(i === 0 ? -1 : 1) * progress * 1.1}%)`,
+                transition: "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)",
               }}
-              initial={{ y: 0 }}
-              animate={{ y: progress >= 100 ? (i === 0 ? "-100%" : "100%") : 0 }}
-              transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1], delay: 0.25 }}
             >
               <div
                 className="absolute inset-0 opacity-40"
@@ -120,11 +111,17 @@ export function Preloader() {
                     "repeating-linear-gradient(180deg, oklch(1 0 0 / 8%) 0 1px, transparent 1px 12px)",
                 }}
               />
+
               <div
                 className="absolute inset-x-0 h-[3px]"
-                style={{ [i === 0 ? "bottom" : "top"]: 0, backgroundImage: "var(--gradient-gold)" } as React.CSSProperties}
+                style={
+                  {
+                    [i === 0 ? "bottom" : "top"]: 0,
+                    backgroundImage: "var(--gradient-gold)",
+                  } as React.CSSProperties
+                }
               />
-            </motion.div>
+            </div>
           ))}
         </motion.div>
       )}

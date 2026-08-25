@@ -94,7 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "MOTURBO — Luxury Automotive Studio" },
       {
         property: "og:description",
-        content: "Step inside the MOTURBO flagship showroom: detailing, protection and bespoke automotive craft.",
+        content:
+          "Step inside the MOTURBO flagship showroom: detailing, protection and bespoke automotive craft.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

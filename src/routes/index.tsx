@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, lazy, Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown, Star } from "lucide-react";
-import { ShowroomStage } from "@/components/three/ShowroomStage";
+import { ArrowRight, ChevronDown, Gem, GaugeCircle, Shield, Star, Wrench } from "lucide-react";
 import { LuxLink, Magnetic, Reveal, SectionHeading, TiltCard } from "@/components/lux";
 import { ProductCard } from "@/components/ProductCard";
 import { ServiceCard } from "@/components/ServiceCard";
 import { PRODUCTS, SERVICES, currency } from "@/data/catalog";
+
+// Lazy-load the heavy 3D showroom component (1.2MB bundle)
+const ShowroomStage = lazy(() => import("@/components/three/ShowroomStage").then(m => ({ default: m.ShowroomStage })));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,7 +22,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "MOTURBO — Flagship Automotive Showroom" },
       {
         property: "og:description",
-        content: "An immersive luxury automotive studio. Detailing, protection and craft, rendered in real time.",
+        content:
+          "An immersive luxury automotive studio. Detailing, protection and craft, rendered in real time.",
       },
     ],
   }),
@@ -76,8 +79,10 @@ function Index() {
 
   return (
     <>
-      {/* ---------- Cinematic 3D showroom ---------- */}
-      <ShowroomStage sectionRef={stageRef} />
+      {/* ---------- Cinematic 3D showroom (lazy-loaded) ---------- */}
+      <Suspense fallback={<div className="pointer-events-none fixed inset-0 -z-10 bg-[#4a454f]" />}>
+        <ShowroomStage sectionRef={stageRef} />
+      </Suspense>
 
       <section ref={stageRef} className="relative">
         {/* Hero */}
@@ -87,14 +92,56 @@ function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 1.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="eyebrow">Est. 2013 · Luxury Automotive Studio</div>
+            <div className="font-display text-[0.72rem] font-bold tracking-[0.34em] text-gold uppercase sm:text-[0.78rem]">
+              EST. 2026 · LUXURY AUTOMOTIVE STUDIO
+            </div>
             <h1 className="mt-6 font-display text-[13vw] leading-[0.85] font-black text-chrome sm:text-[8rem]">
               MOTURBO
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-[0.98rem] leading-relaxed text-muted-foreground text-balance">
-              Detailing, protection and customization performed like couture. Scroll to walk through the
-              flagship showroom.
-            </p>
+            <div className="relative mx-auto mt-6 w-full max-w-3xl rounded-3xl border border-[#2a2633] bg-[#14131b] px-4 py-4 shadow-[0_20px_50px_-30px_oklch(0.12_0.02_300/90%)] sm:px-6">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    icon: Shield,
+                    title: "PREMIUM PROTECTION",
+                    copy: "Advanced ceramic coatings for lasting brilliance.",
+                  },
+                  {
+                    icon: Wrench,
+                    title: "CUSTOMIZATION",
+                    copy: "Personalized upgrades that define your style.",
+                  },
+                  {
+                    icon: GaugeCircle,
+                    title: "PERFORMANCE",
+                    copy: "High performance parts built for enthusiasts.",
+                  },
+                  {
+                    icon: Gem,
+                    title: "LUXURY EXPERIENCE",
+                    copy: "Crafted to deliver unmatched quality and service.",
+                  },
+                ].map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className={`rounded-2xl px-4 py-3 text-left ${
+                        i > 0 ? "border-t border-white/8 sm:border-t-0 lg:border-l" : ""
+                      } ${i > 0 ? "lg:border-white/8" : ""}`}
+                    >
+                      <Icon className="size-5 text-gold" />
+                      <div className="mt-3 font-display text-[0.58rem] font-semibold tracking-[0.18em] text-silver uppercase">
+                        {item.title}
+                      </div>
+                      <p className="mt-2 text-[0.72rem] leading-relaxed text-muted-foreground">
+                        {item.copy}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Magnetic>
                 <LuxLink to="/book">
@@ -102,8 +149,8 @@ function Index() {
                 </LuxLink>
               </Magnetic>
               <Magnetic>
-                <LuxLink to="/shop" variant="ghost">
-                  Explore Atelier
+                <LuxLink to="/shop">
+                  EXPLORE SHOP <ArrowRight className="size-3.5" />
                 </LuxLink>
               </Magnetic>
             </div>
@@ -140,13 +187,21 @@ function Index() {
         <div className="animate-marquee flex w-max gap-10 whitespace-nowrap">
           {Array.from({ length: 2 }).map((_, k) => (
             <div key={k} className="flex gap-10">
-              {["Ceramic Coating", "Paint Protection Film", "Wrapping", "Window Tinting", "Paint Correction", "Bespoke Accessories"].map(
-                (t) => (
-                  <span key={t} className="font-display text-sm tracking-[0.3em] text-muted-foreground uppercase">
-                    {t} <span className="text-gold">✦</span>
-                  </span>
-                ),
-              )}
+              {[
+                "Ceramic Coating",
+                "Paint Protection Film",
+                "Wrapping",
+                "Window Tinting",
+                "Paint Correction",
+                "Bespoke Accessories",
+              ].map((t) => (
+                <span
+                  key={t}
+                  className="font-display text-sm tracking-[0.3em] text-muted-foreground uppercase"
+                >
+                  {t} <span className="text-gold">✦</span>
+                </span>
+              ))}
             </div>
           ))}
         </div>
@@ -157,7 +212,12 @@ function Index() {
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHeading
             eyebrow="Detailing Bays"
-            title={<>Thirteen disciplines,<br /> one standard</>}
+            title={
+              <>
+                Thirteen disciplines,
+                <br /> one standard
+              </>
+            }
             sub="Each service runs its own protocol, its own lighting and its own quality gate before a vehicle leaves the studio."
           />
           <Reveal delay={0.15}>
@@ -213,7 +273,9 @@ function Index() {
             <Reveal key={l} delay={i * 0.07}>
               <TiltCard className="glass lux-border h-full rounded-3xl p-8 text-center">
                 <div className="font-display text-4xl font-bold text-gold">{v}</div>
-                <div className="mt-2 text-[0.7rem] tracking-[0.28em] text-muted-foreground uppercase">{l}</div>
+                <div className="mt-2 text-[0.7rem] tracking-[0.28em] text-muted-foreground uppercase">
+                  {l}
+                </div>
               </TiltCard>
             </Reveal>
           ))}
@@ -222,12 +284,28 @@ function Index() {
 
       {/* ---------- Testimonials ---------- */}
       <section className="mx-auto max-w-7xl px-6 pb-28">
-        <SectionHeading eyebrow="Client Voices" title="Trusted with the rarest keys in the city" align="center" />
+        <SectionHeading
+          eyebrow="Client Voices"
+          title="Trusted with the rarest keys in the city"
+          align="center"
+        />
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
           {[
-            ["The ceramic work on my GT3 is the best I've seen anywhere in Europe.", "Julien R.", "Porsche 911 GT3"],
-            ["They wrapped a hypercar in satin without a single relief cut. Surgical.", "Amara K.", "Lamborghini Revuelto"],
-            ["Concierge collection, live progress photos, flawless finish. Effortless.", "Idris M.", "Range Rover SV"],
+            [
+              "The ceramic work on my GT3 is the best I've seen anywhere in Europe.",
+              "Julien R.",
+              "Porsche 911 GT3",
+            ],
+            [
+              "They wrapped a hypercar in satin without a single relief cut. Surgical.",
+              "Amara K.",
+              "Lamborghini Revuelto",
+            ],
+            [
+              "Concierge collection, live progress photos, flawless finish. Effortless.",
+              "Idris M.",
+              "Range Rover SV",
+            ],
           ].map(([quote, name, car], i) => (
             <Reveal key={name} delay={i * 0.08}>
               <TiltCard className="glass lux-border h-full rounded-3xl p-8">
@@ -256,8 +334,8 @@ function Index() {
                 Reserve a bay in the <span className="text-gold">flagship studio</span>
               </h2>
               <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">
-                Choose your vehicle, service and package. Concierge collection available across all three branches
-                from {currency(60)}.
+                Choose your vehicle, service and package. Concierge collection available across all
+                three branches from {currency(60)}.
               </p>
               <div className="mt-9 flex flex-wrap justify-center gap-3">
                 <Magnetic>
