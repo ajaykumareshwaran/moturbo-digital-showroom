@@ -21,8 +21,8 @@ export function Preloader() {
 
     let v = 0;
     const id = window.setInterval(() => {
-      // Keep shutter travel smooth, while finishing promptly when ready.
-      const step = pageLoaded ? 10 : Math.random() * 6 + 3;
+      // Smooth consistent steps — no randomness to avoid stuttering
+      const step = pageLoaded ? 1.4 : 0.7;
       v = Math.min(100, v + step);
       setProgress(Math.round(v));
 
@@ -32,9 +32,9 @@ export function Preloader() {
         // Small pause so the user sees the fully-open shutter before fade-out
         window.setTimeout(() => {
           setDone(true);
-        }, 320);
+        }, 500);
       }
-    }, 65);
+    }, 22);
 
     return () => {
       clearInterval(id);
@@ -58,6 +58,15 @@ export function Preloader() {
             <div className="absolute inset-0 spotlight" />
             <div className="absolute left-1/2 top-1/2 h-[46vh] w-[46vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-royal/25 blur-[120px]" />
             <div className="relative flex h-full flex-col items-center justify-center gap-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6, filter: "blur(20px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                className="h-28 w-28 sm:h-36 sm:w-36"
+              >
+                <img src="/moturbo_lg.png" alt="MOTURBO" className="size-full object-contain drop-shadow-[0_0_40px_oklch(0.75_0.18_80/0.7)]" />
+              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, letterSpacing: "0.9em", filter: "blur(14px)" }}
                 animate={{ opacity: 1, letterSpacing: "0.35em", filter: "blur(0px)" }}
@@ -101,7 +110,7 @@ export function Preloader() {
                 backgroundSize: "100% 14px",
                 boxShadow: "0 0 60px oklch(0 0 0 / 80%)",
                 transform: `translateY(${(i === 0 ? -1 : 1) * progress * 1.1}%)`,
-                transition: "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)",
+                transition: "transform 0.28s linear",
               }}
             >
               <div

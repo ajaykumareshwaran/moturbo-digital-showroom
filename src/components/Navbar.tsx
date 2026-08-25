@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Menu, ShoppingBag, Heart, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/context/StoreContext";
 import { LuxLink, Magnetic } from "@/components/lux";
+import { MoturboLogo } from "@/components/MoturboLogo";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -21,12 +22,27 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const scrollRafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    let lastScrollY = window.scrollY;
+    const onScroll = () => {
+      if (scrollRafRef.current) return;
+      scrollRafRef.current = requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        const shouldBeScrolled = window.scrollY > 40;
+        if (shouldBeScrolled !== lastScrollY > 40) {
+          lastScrollY = window.scrollY;
+          setScrolled(shouldBeScrolled);
+        }
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -44,12 +60,9 @@ export function Navbar() {
           )}
         >
           <Link to="/" className="mr-auto flex items-center gap-2.5">
-            <span
-              className="relative grid size-8 place-items-center rounded-lg"
-              style={{ backgroundImage: "var(--gradient-royal)" }}
-            >
-              <span className="font-display text-[0.7rem] font-black text-gold-soft">M</span>
-            </span>
+            <div className="size-10">
+              <MoturboLogo />
+            </div>
             <span className="font-display text-sm font-extrabold tracking-[0.34em] text-chrome">
               MOTURBO
             </span>

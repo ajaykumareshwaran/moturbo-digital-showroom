@@ -235,13 +235,13 @@
     background: oklch(0.55 0.21 298 / 45%);
   }
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 12px;
   }
   ::-webkit-scrollbar-track {
     background: var(--noir);
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(var(--purple-royal), var(--gold));
+    background: linear-gradient(180deg, var(--purple-royal) 0%, #9d4edd 50%, var(--purple-royal) 100%);
     border-radius: 99px;
   }
 }

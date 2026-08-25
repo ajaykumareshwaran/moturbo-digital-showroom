@@ -8,12 +8,13 @@ export function SmoothScroll() {
     // Defer Lenis initialization until after first paint
     const timeoutId = setTimeout(() => {
       gsap.registerPlugin(ScrollTrigger);
+      
       const lenis = new Lenis({ 
-        duration: 1.2, 
+        duration: 1.0, 
         smoothWheel: true, 
-        lerp: 0.05,
+        lerp: 0.04,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        wheelMultiplier: 0.8
+        wheelMultiplier: 0.75
       });
       (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
@@ -27,7 +28,7 @@ export function SmoothScroll() {
         lenis.destroy();
         ScrollTrigger.getAll().forEach((t) => t.kill());
       };
-    }, 50);
+    }, 100);
 
     return () => clearTimeout(timeoutId);
   }, []);
