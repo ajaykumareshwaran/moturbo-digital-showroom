@@ -7,6 +7,12 @@ export function SmoothScroll() {
       return;
     }
 
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isCoarsePointer || prefersReducedMotion) {
+      return;
+    }
+
     let destroy: (() => void) | undefined;
     let cancelled = false;
 
@@ -45,7 +51,7 @@ export function SmoothScroll() {
           duration: 1.0,
           smoothWheel: true,
           lerp: 0.04,
-                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           wheelMultiplier: 0.75,
         });
         (window as unknown as { lenis?: Lenis }).lenis = lenis;

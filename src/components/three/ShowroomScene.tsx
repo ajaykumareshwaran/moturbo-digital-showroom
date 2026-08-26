@@ -17,6 +17,7 @@ type P = {
 function Car({ highQuality }: { highQuality: boolean }) {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF("/models/car2.glb", undefined);
+  const accumulated = useRef(0);
 
   const model = useMemo(() => {
     const cloned = scene.clone(true);
@@ -30,7 +31,14 @@ function Car({ highQuality }: { highQuality: boolean }) {
   }, [scene, highQuality]);
 
   useFrame((_, dt) => {
-    if (group.current) group.current.rotation.y += dt * 0.035;
+    accumulated.current += dt;
+    const tick = highQuality ? 1 / 60 : 1 / 30;
+    if (accumulated.current < tick) {
+      return;
+    }
+    const step = accumulated.current;
+    accumulated.current = 0;
+    if (group.current) group.current.rotation.y += step * 0.035;
   });
 
   return (
@@ -44,6 +52,7 @@ type QualityProfile = {
   highQuality: boolean;
   dpr: number | [number, number];
   antialias: boolean;
+  precision: "highp" | "mediump";
 };
 
 /* ---------- Detailing Lab niche — left wall ---------- */
@@ -1889,10 +1898,17 @@ function CameraRig({ progress, pointer }: P) {
 
 function Lights({ highQuality }: { highQuality: boolean }) {
   const spot = useRef<THREE.SpotLight>(null);
+  const accumulated = useRef(0);
   useFrame(({ clock }, dt) => {
+    accumulated.current += dt;
+    const tick = highQuality ? 1 / 60 : 1 / 24;
+    if (accumulated.current < tick) {
+      return;
+    }
+    const step = accumulated.current;
+    accumulated.current = 0;
     if (spot.current) {
-      // Reduce update frequency for better performance
-      spot.current.intensity = 130 + Math.sin(clock.elapsedTime * 1.5) * 12;
+      spot.current.intensity = 130 + Math.sin((clock.elapsedTime + step) * 1.5) * 12;
     }
   });
   return (
@@ -1925,7 +1941,7 @@ function Lights({ highQuality }: { highQuality: boolean }) {
 export default function ShowroomScene({ progress, pointer }: P) {
   const profile = useMemo<QualityProfile>(() => {
     if (typeof window === "undefined") {
-      return { highQuality: true, dpr: [1, 1.25], antialias: true };
+      return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
     }
 
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -1933,26 +1949,36 @@ export default function ShowroomScene({ progress, pointer }: P) {
     const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const lowPower = isMobile || cores <= 6 || memory <= 4 || prefersReducedMotion;
-    if (lowPower) {
-      return { highQuality: false, dpr: 0.85, antialias: false };
+    const ultraLowPower = isMobile && (cores <= 6 || memory <= 6 || prefersReducedMotion);
+    if (ultraLowPower) {
+      return { highQuality: false, dpr: 0.62, antialias: false, precision: "mediump" };
     }
 
-    return { highQuality: true, dpr: [1, 1.25], antialias: true };
+    const lowPower = isMobile || cores <= 6 || memory <= 4 || prefersReducedMotion;
+    if (lowPower) {
+      return { highQuality: false, dpr: 0.74, antialias: false, precision: "mediump" };
+    }
+
+    return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
   }, []);
 
   return (
     <Canvas
       shadows={profile.highQuality}
       dpr={profile.dpr}
-      gl={{ antialias: profile.antialias, powerPreference: "high-performance", alpha: false }}
-      performance={{ min: 0.65, max: 1, debounce: 300 }}
+      gl={{
+        antialias: profile.antialias,
+        powerPreference: profile.highQuality ? "high-performance" : "default",
+        precision: profile.precision,
+        alpha: false,
+      }}
+      performance={{ min: 0.5, max: 1, debounce: 500 }}
       camera={{ position: [0, 2.6, 13], fov: 42, near: 0.1, far: 200 }}
     >
       <color attach="background" args={["#4a454f"]} />
       <fogExp2 attach="fog" args={["#4a454f", 0.012]} />
       <Lights highQuality={profile.highQuality} />
-      <Environment files="/dikhololo_night_1k.hdr" />
+      <Environment files="/dikhololo_night_1k.hdr" resolution={profile.highQuality ? 256 : 96} />
       <Float speed={1.1} rotationIntensity={0.06} floatIntensity={0.18}>
         <Car highQuality={profile.highQuality} />
       </Float>

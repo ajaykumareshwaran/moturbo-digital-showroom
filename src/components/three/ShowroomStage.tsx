@@ -14,6 +14,7 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
   const purpleLayerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const allowPointerParallax = !window.matchMedia("(pointer: coarse)").matches;
     let scrollRaf = 0;
     let moveRaf = 0;
     let settleRaf = 0;
@@ -73,7 +74,9 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
     const onLoad = () => updateProgress();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    window.addEventListener("pointermove", onMove, { passive: true });
+    if (allowPointerParallax) {
+      window.addEventListener("pointermove", onMove, { passive: true });
+    }
     window.addEventListener("load", onLoad);
     window.addEventListener("pageshow", onLoad);
     return () => {
@@ -83,7 +86,9 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       if (settleRaf2) window.cancelAnimationFrame(settleRaf2);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      window.removeEventListener("pointermove", onMove);
+      if (allowPointerParallax) {
+        window.removeEventListener("pointermove", onMove);
+      }
       window.removeEventListener("load", onLoad);
       window.removeEventListener("pageshow", onLoad);
     };
