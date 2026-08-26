@@ -34,7 +34,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <div className="eyebrow">Newsletter</div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Private previews of new finishes, atelier drops and members-only detailing slots.
+              Private previews of new finishes, workroom drops and members-only detailing slots.
             </p>
             <form
               className="glass mt-6 flex items-center gap-2 rounded-full p-1.5"
@@ -112,13 +112,13 @@ export function Footer() {
                 <MapPin className="mt-0.5 size-4 shrink-0 text-gold/70" /> MG Road, Bengaluru
               </li>
               <li className="flex gap-2.5">
-                <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +91 98765 43210
+                <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +91 8147702688
               </li>
               <li className="flex gap-2.5">
-                <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> atelier@moturbo.com
+                <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> moturboweb@gmail.com
               </li>
               <li className="flex gap-2.5">
-                <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold/70" /> WhatsApp concierge
+                <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold/70" /> WhatsApp executive
               </li>
             </ul>
             <div className="mt-6 text-sm text-muted-foreground">

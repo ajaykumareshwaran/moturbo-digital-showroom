@@ -29,7 +29,7 @@ type StoreValue = {
   toggleWishlist: (slug: string) => void;
   toggleCompare: (slug: string) => void;
   markViewed: (slug: string) => void;
-  addBooking: (b: Omit<Booking, "id" | "status">) => Booking;
+  addBooking: (b: Omit<Booking, "id" | "status"> & Partial<Pick<Booking, "id" | "status">>) => Booking;
   coupon: string | null;
   applyCoupon: (code: string) => boolean;
   subtotal: number;
@@ -41,7 +41,7 @@ type StoreValue = {
 
 const StoreContext = createContext<StoreValue | null>(null);
 const KEY = "moturbo.store.v1";
-const COUPONS: Record<string, number> = { MOTURBO10: 0.1, GOLD20: 0.2, ATELIER15: 0.15 };
+const COUPONS: Record<string, number> = { MOTURBO10: 0.1, GOLD20: 0.2, WORKROOM15: 0.15 };
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -106,8 +106,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const addBooking = useCallback((b: Omit<Booking, "id" | "status">) => {
-    const booking: Booking = { ...b, id: `MT-${Math.random().toString(36).slice(2, 8).toUpperCase()}`, status: "Confirmed" };
+  const addBooking = useCallback((b: Omit<Booking, "id" | "status"> & Partial<Pick<Booking, "id" | "status">>) => {
+    const booking: Booking = {
+      ...b,
+      id: b.id ?? `MT-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      status: b.status ?? "Confirmed",
+    };
     setBookings((prev) => [booking, ...prev]);
     return booking;
   }, []);

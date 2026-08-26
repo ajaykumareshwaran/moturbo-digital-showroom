@@ -31,7 +31,7 @@ const mk = (
   slug,
   name,
   tagline,
-  description: `${name} — engineered in the MOTURBO studio for obsessive finish quality. ${tagline} Every unit is bench-tested, hand-inspected and sealed in signature purple-and-gold packaging before it leaves the atelier.`,
+  description: `${name} — engineered in the MOTURBO studio for obsessive finish quality. ${tagline} Every unit is bench-tested, hand-inspected and sealed in signature purple-and-gold packaging before it leaves the workroom.`,
   price,
   category,
   brand,
@@ -39,7 +39,7 @@ const mk = (
   reviews,
   hue,
   specs: [
-    { label: "Origin", value: "MOTURBO Atelier" },
+    { label: "Origin", value: "MOTURBO Workroom" },
     { label: "Warranty", value: "24 months" },
     { label: "Finish", value: "Showroom grade" },
   ],
@@ -63,8 +63,8 @@ export const PRODUCTS: Product[] = [
     },
   ),
   mk(
-    "atelier-cleaning-kit",
-    "Atelier Cleaning Kit",
+    "workroom-cleaning-kit",
+    "Workroom Cleaning Kit",
     "Fourteen pieces of studio discipline.",
     289,
     "Kits",
@@ -378,9 +378,9 @@ export const PACKAGES = [
 ];
 
 export const BRANCHES = [
-  { id: "downtown", name: "MOTURBO Bengaluru Atelier", address: "Level 1, MG Road, Bengaluru" },
-  { id: "north", name: "MOTURBO Delhi Studio", address: "Unit 14, Aerocity District, New Delhi" },
-  { id: "airport", name: "MOTURBO Mumbai Bay", address: "Andheri Kurla Road, Mumbai" },
+  { id: "downtown", name: "MOTURBO Bengaluru Showroom", address: "Level 1, MG Road, Bengaluru" },
+  { id: "north", name: "MOTURBO Upcoming Studio", address: "Unit 2, Coming Soon" },
+  { id: "airport", name: "MOTURBO Upcoming Bay", address: "Unit 3, Coming Soon" },
 ];
 
 export const VEHICLE_BRANDS = [
@@ -399,27 +399,27 @@ export const VEHICLE_TYPES = ["Coupe", "Sedan", "SUV", "Hypercar", "Motorcycle"]
 
 export const TIMELINE = [
   {
-    year: "2013",
+    year: "2026 Jan-Feb",
     title: "One bay, one obsession",
     body: "MOTURBO opens as a single-bay paint correction studio.",
   },
   {
-    year: "2016",
+    year: "2026 Mar-May",
     title: "The ceramic era",
     body: "First certified 9H coating line in the region.",
   },
   {
-    year: "2019",
+    year: "2026 Jun-Aug",
     title: "The flagship showroom",
     body: "A 2,400 m² glass-walled studio with reflective black floors.",
   },
   {
-    year: "2022",
-    title: "Accessory atelier",
+    year: "2026 Sep-Nov",
+    title: "Accessory workroom",
     body: "In-house product line launches across major Indian cities.",
   },
   {
-    year: "2026",
+    year: "Present",
     title: "Digital showroom",
     body: "The MOTURBO experience goes fully immersive online.",
   },
@@ -459,7 +459,7 @@ export const POSTS = [
     slug: "interior-scent-design",
     title: "Designing the scent of a cabin",
     excerpt: "How Noir Élixir was blended over 40 iterations.",
-    tag: "Atelier",
+    tag: "Workroom",
     read: "5 min",
   },
   {

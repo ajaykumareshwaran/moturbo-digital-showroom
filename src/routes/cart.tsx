@@ -12,9 +12,9 @@ export const Route = createFileRoute("/cart")({
   head: () => ({
     meta: [
       { title: "Your Cart | MOTURBO" },
-      { name: "description", content: "Review your MOTURBO atelier selection, apply a coupon and check out." },
+      { name: "description", content: "Review your MOTURBO workroom selection, apply a coupon and check out." },
       { property: "og:title", content: "Your Cart | MOTURBO" },
-      { property: "og:description", content: "Concierge delivery on every atelier order." },
+      { property: "og:description", content: "Executive delivery on every workroom order." },
     ],
   }),
   component: CartPage,
@@ -33,7 +33,7 @@ function CartPage() {
             <div className="glass rounded-3xl p-14 text-center">
               <p className="text-sm text-muted-foreground">Your bag is empty.</p>
               <div className="mt-6">
-                <LuxLink to="/shop">Browse the atelier</LuxLink>
+                <LuxLink to="/shop">Browse the shop</LuxLink>
               </div>
             </div>
           )}

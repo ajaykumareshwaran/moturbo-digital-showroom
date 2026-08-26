@@ -1,11 +1,42 @@
 import { Link } from "@tanstack/react-router";
-import * as Icons from "lucide-react";
-import { ArrowUpRight } from "lucide-react";
+import {
+  Armchair,
+  ArrowUpRight,
+  Bike,
+  Car,
+  CircleDot,
+  Cog,
+  Droplets,
+  Gem,
+  Layers,
+  Lightbulb,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Wand2,
+  type LucideIcon,
+} from "lucide-react";
 import { TiltCard } from "@/components/lux";
 import { currency, type Service } from "@/data/catalog";
 
+const SERVICE_ICONS: Record<string, LucideIcon> = {
+  Sparkles,
+  ShieldCheck,
+  Layers,
+  Sun,
+  Armchair,
+  Car,
+  Bike,
+  CircleDot,
+  Cog,
+  Lightbulb,
+  Wand2,
+  Droplets,
+  Gem,
+};
+
 export function ServiceCard({ service }: { service: Service }) {
-  const Icon = (Icons as unknown as Record<string, Icons.LucideIcon>)[service.icon] ?? Icons.Sparkles;
+  const Icon = SERVICE_ICONS[service.icon] ?? Sparkles;
   return (
     <TiltCard className="glass lux-border h-full rounded-3xl p-7" intensity={7}>
       <div className="flex items-start justify-between">

@@ -4,9 +4,52 @@ import { PageHeader } from "@/components/PageHeader";
 import { LuxLink, Reveal } from "@/components/lux";
 import { useStore } from "@/context/StoreContext";
 import { currency } from "@/data/catalog";
+import { reviewOrder } from "@/lib/commerce";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/track")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    action: typeof search["action"] === "string" ? (search["action"] as string) : undefined,
+    code: typeof search["code"] === "string" ? (search["code"] as string) : undefined,
+  }),
+  loaderDeps: ({ search }) => ({
+    action: search.action,
+    code: search.code,
+  }),
+  loader: async ({ deps }) => {
+    if (!deps.code || (deps.action !== "accept" && deps.action !== "decline")) {
+      return { state: "idle" as const, message: "" };
+    }
+
+    try {
+      const result = await reviewOrder({
+        data: {
+          orderCode: deps.code,
+          action: deps.action,
+        },
+      });
+
+      if (result.status === "accepted") {
+        return {
+          state: "accepted" as const,
+          message: result.alreadyProcessed
+            ? `Order ${result.orderCode} was already accepted earlier.`
+            : `Order ${result.orderCode} accepted. Customer has been notified.`,
+        };
+      }
+
+      return {
+        state: "declined" as const,
+        message: result.alreadyProcessed
+          ? `Order ${result.orderCode} was already declined earlier.`
+          : `Order ${result.orderCode} declined.`,
+      };
+    } catch (error) {
+      console.error(error);
+      const message = error instanceof Error ? error.message : "Could not update this order action.";
+      return { state: "error" as const, message };
+    }
+  },
   head: () => ({
     meta: [
       { title: "Track Your Booking | MOTURBO" },
@@ -21,12 +64,21 @@ export const Route = createFileRoute("/track")({
 const STAGES = ["Confirmed", "Intake", "In studio", "Quality gate", "Ready"];
 
 function TrackPage() {
+  const actionResult = Route.useLoaderData();
   const { bookings } = useStore();
 
   return (
     <>
-      <PageHeader eyebrow="Concierge" title={<>Track your <span className="text-gold">visit</span></>} />
+      <PageHeader eyebrow="Executive" title={<>Track your <span className="text-gold">visit</span></>} />
       <section className="mx-auto max-w-4xl space-y-6 px-6 pb-28">
+        {actionResult.state !== "idle" && (
+          <div className="glass lux-border rounded-3xl p-6 text-sm">
+            {actionResult.state === "accepted" && <p className="text-gold">{actionResult.message}</p>}
+            {actionResult.state === "declined" && <p className="text-muted-foreground">{actionResult.message}</p>}
+            {actionResult.state === "error" && <p className="text-destructive">{actionResult.message}</p>}
+          </div>
+        )}
+
         {bookings.length === 0 && (
           <div className="glass rounded-3xl p-16 text-center">
             <p className="text-sm text-muted-foreground">No reservations yet.</p>

@@ -274,8 +274,8 @@ function DetailingLabNiche() {
   );
 }
 
-/* ---------- Accessory Atelier niche — right wall ---------- */
-function AccessoryAtelierNiche() {
+/* ---------- Accessory Workroom niche — right wall ---------- */
+function AccessoryWorkroomNiche() {
   const floatRef = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
     if (floatRef.current)
@@ -550,7 +550,7 @@ function AccessoryAtelierNiche() {
         anchorX="center"
         anchorY="middle"
       >
-        ACCESSORY ATELIER
+        ACCESSORY WORKROOM
       </Text>
     </group>
   );
@@ -976,7 +976,7 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
 
       {/* Premium architectural wall niche displays */}
       <DetailingLabNiche />
-      <AccessoryAtelierNiche />
+      <AccessoryWorkroomNiche />
       <CenterCinematicWallDisplay />
       {[
         { x: -10.55, z: -6.2, seed: 1 },

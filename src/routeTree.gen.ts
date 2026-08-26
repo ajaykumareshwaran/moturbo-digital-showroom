@@ -17,6 +17,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as OrderActionRouteImport } from './routes/order-action'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as WishlistRouteImport } from './routes/wishlist'
@@ -63,6 +64,11 @@ const GalleryRoute = GalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrderActionRoute = OrderActionRouteImport.update({
+  id: '/order-action',
+  path: '/order-action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
   '/wishlist': typeof WishlistRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
   '/wishlist': typeof WishlistRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
   '/wishlist': typeof WishlistRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
+    | '/order-action'
     | '/services'
     | '/track'
     | '/wishlist'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
+    | '/order-action'
     | '/services'
     | '/track'
     | '/wishlist'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
+    | '/order-action'
     | '/services'
     | '/track'
     | '/wishlist'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
+  OrderActionRoute: typeof OrderActionRoute
   ServicesRoute: typeof ServicesRoute
   TrackRoute: typeof TrackRoute
   WishlistRoute: typeof WishlistRoute
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/order-action': {
+      id: '/order-action'
+      path: '/order-action'
+      fullPath: '/order-action'
+      preLoaderRoute: typeof OrderActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
+  OrderActionRoute: OrderActionRoute,
   ServicesRoute: ServicesRoute,
   TrackRoute: TrackRoute,
   WishlistRoute: WishlistRoute,

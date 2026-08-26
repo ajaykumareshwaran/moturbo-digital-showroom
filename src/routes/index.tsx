@@ -53,7 +53,7 @@ const CHAPTERS = [
   },
   {
     eyebrow: "Chapter 05 — Cabin",
-    title: "Interior atelier",
+    title: "Interior workroom",
     body: "Steam extraction, nappa reconditioning and a scent blended in-house across forty iterations.",
   },
   {
@@ -62,14 +62,14 @@ const CHAPTERS = [
     body: "From signature wash to full paint protection film, each bay runs its own protocol and its own lighting.",
   },
   {
-    eyebrow: "Chapter 07 — Atelier Wall",
+    eyebrow: "Chapter 07 — Workroom Wall",
     title: "Accessories on display",
     body: "Every product we sell is used on the studio floor first. If it doesn't survive here, it doesn't ship.",
   },
   {
     eyebrow: "Chapter 08 — Reception",
     title: "Reserve your slot",
-    body: "Three branches, concierge collection and a live progress feed for every vehicle in the studio.",
+    body: "Three branches, executive collection and a live progress feed for every vehicle in the studio.",
   },
 ];
 
@@ -286,7 +286,7 @@ function Index() {
         <div className="absolute inset-0 spotlight" />
         <div className="relative mx-auto max-w-7xl px-6">
           <SectionHeading
-            eyebrow="Atelier Collection"
+            eyebrow="Workroom Collection"
             title="Products on luxury display stands"
             sub="Move your cursor across each piece — lighting, reflections and depth respond in real time."
             align="center"
@@ -379,8 +379,8 @@ function Index() {
                 Reserve a bay in the <span className="text-gold">flagship studio</span>
               </h2>
               <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">
-                Choose your vehicle, service and package. Concierge collection available across all
-                three branches from {currency(60)}.
+                Choose your vehicle, service and package. Executive collection available across
+                bangalore from {currency(60)}.
               </p>
               <div className="mt-9 flex flex-wrap justify-center gap-3">
                 <Magnetic>
@@ -390,7 +390,7 @@ function Index() {
                   to="/contact"
                   className="font-display text-[0.68rem] tracking-[0.24em] text-muted-foreground uppercase underline-offset-8 transition-colors hover:text-gold-soft hover:underline"
                 >
-                  Talk to concierge
+                  Talk to executive
                 </Link>
               </div>
             </div>

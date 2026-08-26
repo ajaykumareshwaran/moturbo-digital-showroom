@@ -39,7 +39,7 @@ export function MiniCart() {
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
               {lines.length === 0 && (
                 <p className="pt-16 text-center text-sm text-muted-foreground">
-                  The display stand is empty. Browse the atelier collection.
+                  The display stand is empty. Browse the shop collection.
                 </p>
               )}
               {lines.map(({ product, qty }) => (

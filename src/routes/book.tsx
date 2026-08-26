@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { LuxButton, Magnetic } from "@/components/lux";
 import { BRANCHES, SERVICES, VEHICLE_BRANDS, currency } from "@/data/catalog";
 import { useStore } from "@/context/StoreContext";
+import { createBooking } from "@/lib/commerce";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/book")({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/book")({
         content: "Reserve a MOTURBO bay in four steps: choose your service, your car, your slot and confirm.",
       },
       { property: "og:title", content: "Book a Studio Slot | MOTURBO" },
-      { property: "og:description", content: "Concierge collection, private lounge, live progress updates." },
+      { property: "og:description", content: "Executive collection, private lounge, live progress updates." },
     ],
   }),
   component: BookPage,
@@ -41,24 +42,58 @@ function BookPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState(TIMES[2]!);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const chosen = SERVICES.find((s) => s.slug === service) ?? SERVICES[0]!;
   const canNext = step === 1 ? model.trim().length > 1 : step === 2 ? date !== "" : true;
 
-  function confirm() {
-    const created = addBooking({
-      service: chosen.name,
-      package: chosen.name,
-      vehicle: `${brand} ${model}`,
-      branch,
-      date,
-      time,
-      total: chosen.from,
-    });
-    setDone(created.id);
-    toast.success("Bay reserved");
+  async function confirm() {
+    if (!name.trim() || !email.trim() || !phone.trim()) {
+      toast.error("Please add your name, email and phone");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await createBooking({
+        data: {
+          service: chosen.name,
+          packageName: chosen.name,
+          vehicle: `${brand} ${model}`,
+          branch,
+          date,
+          time,
+          total: chosen.from,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
+        },
+      });
+
+      const created = addBooking({
+        id: result.bookingCode,
+        status: "Confirmed",
+        service: chosen.name,
+        package: chosen.name,
+        vehicle: `${brand} ${model}`,
+        branch,
+        date,
+        time,
+        total: chosen.from,
+      });
+
+      setDone(created.id);
+      toast.success("Bay reserved");
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not reserve the bay. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -66,7 +101,7 @@ function BookPage() {
       <PageHeader
         eyebrow="Reservation"
         title={<>Book your <span className="text-gold">bay</span></>}
-        sub="Four steps. Concierge collection available across the city."
+        sub="Four steps. Executive collection available across the city."
       />
 
       <section className="mx-auto max-w-4xl px-6 pb-28">
@@ -221,6 +256,14 @@ function BookPage() {
                       <Field label="Full name">
                         <input value={name} onChange={(e) => setName(e.target.value)} className="input-lux" />
                       </Field>
+                      <Field label="Email">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="input-lux"
+                        />
+                      </Field>
                       <Field label="Phone">
                         <input value={phone} onChange={(e) => setPhone(e.target.value)} className="input-lux" />
                       </Field>
@@ -239,8 +282,8 @@ function BookPage() {
                 </button>
                 <Magnetic>
                   {step === 3 ? (
-                    <LuxButton onClick={confirm} disabled={!name || !phone}>
-                      Confirm reservation
+                    <LuxButton onClick={confirm} disabled={!name || !email || !phone || isSubmitting}>
+                      {isSubmitting ? "Confirming..." : "Confirm reservation"}
                     </LuxButton>
                   ) : (
                     <LuxButton onClick={() => canNext && setStep((s) => s + 1)} disabled={!canNext}>

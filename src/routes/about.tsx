@@ -9,7 +9,7 @@ export const Route = createFileRoute("/about")({
       { title: "About the Studio | MOTURBO" },
       {
         name: "description",
-        content: "MOTURBO is a precision automotive atelier: craftsmanship, controlled lighting and obsessive finish standards.",
+        content: "MOTURBO is a precision automotive workroom: craftsmanship, controlled lighting and obsessive finish standards.",
       },
       { property: "og:title", content: "About the Studio | MOTURBO" },
       { property: "og:description", content: "Our story, our standards and the people behind the finish." },
@@ -24,15 +24,15 @@ function AboutPage() {
       <PageHeader
         eyebrow="The Studio"
         title={<>Obsession, <span className="text-gold">measured</span> in microns</>}
-        sub="MOTURBO began as a single correction bay. It is now a connected atelier for protection, customization and accessories."
+        sub="MOTURBO began as a single correction bay. It is now a connected workroom for protection, customization and accessories."
       />
 
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <div className="grid gap-6 sm:grid-cols-3">
           {[
-            ["12", "Years of finish work"],
-            ["9,400", "Vehicles through the bays"],
-            ["31", "Craftspeople on the floor"],
+            ["1", "Year of finished work"],
+            ["1000", "Vehicles through the bays"],
+            ["Super 7", "Craftspeople on the floor"],
           ].map(([n, l], i) => (
             <Reveal key={l} delay={i * 0.08}>
               <div className="glass lux-border rounded-3xl p-8 text-center">
@@ -47,7 +47,7 @@ function AboutPage() {
       <section className="relative border-y border-white/8 py-24">
         <div className="absolute inset-0 spotlight" />
         <div className="relative mx-auto max-w-3xl px-6">
-          <SectionHeading eyebrow="Timeline" title="How the atelier grew" align="center" />
+          <SectionHeading eyebrow="Timeline" title="How the workroom grew" align="center" />
           <div className="mt-14 space-y-8">
             {TIMELINE.map((t, i) => (
               <Reveal key={t.year} delay={i * 0.06}>

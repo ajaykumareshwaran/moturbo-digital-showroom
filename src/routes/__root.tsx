@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "MOTURBO is a flagship automotive detailing, customization and accessories studio. Ceramic coating, PPF, wrapping and an atelier product line.",
+          "MOTURBO is a flagship automotive detailing, customization and accessories studio. Ceramic coating, PPF, wrapping and an workroom product line.",
       },
       { name: "author", content: "MOTURBO" },
       { property: "og:title", content: "MOTURBO — Luxury Automotive Studio" },
@@ -146,7 +146,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
-        <Toaster position="bottom-right" />
+        <Toaster position="bottom-right" offset={{ bottom: 170, right: 45 }} />
       </StoreProvider>
     </QueryClientProvider>
   );

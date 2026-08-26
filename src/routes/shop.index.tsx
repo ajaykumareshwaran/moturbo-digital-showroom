@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
-      { title: "Shop — Atelier Detailing Collection | MOTURBO" },
+      { title: "Shop — Workroom Detailing Collection | MOTURBO" },
       {
         name: "description",
         content:
-          "Ceramic kits, machines, fragrances and interior care from the MOTURBO atelier. Filter by category, brand, price and rating.",
+          "Ceramic kits, machines, fragrances and interior care from the MOTURBO workroom. Filter by category, brand, price and rating.",
       },
-      { property: "og:title", content: "Shop — Atelier Detailing Collection | MOTURBO" },
+      { property: "og:title", content: "Shop — Workroom Detailing Collection | MOTURBO" },
       { property: "og:description", content: "Every product is used on the studio floor before it ships." },
     ],
   }),
@@ -57,7 +57,7 @@ function ShopPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Atelier Collection"
+        eyebrow="Workroom Collection"
         title={<>The MOTURBO <span className="text-gold">shop</span></>}
         sub="Sixteen studio-tested pieces across protection, machines, interior and fragrance."
       />
@@ -66,10 +66,10 @@ function ShopPage() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="glass lux-border flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-4">
           <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-            Offer · Free concierge delivery over {currency(300)}
+            Offer · Free executive delivery over {currency(300)}
           </p>
           <p className="font-display text-xs tracking-[0.2em] text-gold uppercase">
-            Coupon: MOTURBO10 · GOLD20 · ATELIER15
+            Coupon: MOTURBO10 · GOLD20 · WORKROOM15
           </p>
         </div>
       </div>
@@ -137,7 +137,7 @@ function ShopPage() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search the atelier…"
+                placeholder="Search the workroom…"
                 className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
               />
               {q && (

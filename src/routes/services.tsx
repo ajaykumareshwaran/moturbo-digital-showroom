@@ -46,7 +46,7 @@ function ServicesPage() {
           <SectionHeading
             eyebrow="Packages"
             title="Three levels of finish"
-            sub="Bundle disciplines into a single studio visit. All packages include concierge collection within the city."
+            sub="Bundle disciplines into a single studio visit. All packages include executive collection within the city."
             align="center"
           />
           <div className="mt-14 grid gap-6 lg:grid-cols-3">

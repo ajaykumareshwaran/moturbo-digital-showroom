@@ -9,7 +9,7 @@ export const Route = createFileRoute("/wishlist")({
   head: () => ({
     meta: [
       { title: "Wishlist | MOTURBO" },
-      { name: "description", content: "Pieces you have saved from the MOTURBO atelier collection." },
+      { name: "description", content: "Pieces you have saved from the MOTURBO workroom collection." },
       { property: "og:title", content: "Wishlist | MOTURBO" },
       { property: "og:description", content: "Saved pieces, kept for your next studio visit." },
     ],
@@ -29,7 +29,7 @@ function WishlistPage() {
           <div className="glass rounded-3xl p-16 text-center">
             <p className="text-sm text-muted-foreground">Nothing saved yet.</p>
             <div className="mt-6">
-              <LuxLink to="/shop">Browse the atelier</LuxLink>
+              <LuxLink to="/shop">Browse the shop</LuxLink>
             </div>
           </div>
         ) : (

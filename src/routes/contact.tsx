@@ -21,6 +21,32 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const whatsappNumber = "918147702668";
+
+  function openWhatsAppEnquiry(form: HTMLFormElement) {
+    const data = new FormData(form);
+    const fullName = String(data.get("fullName") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const phone = String(data.get("phone") ?? "").trim();
+    const vehicle = String(data.get("vehicle") ?? "").trim();
+    const enquiry = String(data.get("enquiry") ?? "").trim();
+
+    const message = [
+      "Hello MOTURBO, I'd like to send an enquiry:",
+      "",
+      `Name: ${fullName}`,
+      `Email: ${email}`,
+      `Phone: ${phone || "Not provided"}`,
+      `Vehicle: ${vehicle || "Not provided"}`,
+      "",
+      "Requirement:",
+      enquiry,
+    ].join("\n");
+
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <>
       <PageHeader
@@ -38,19 +64,20 @@ function ContactPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              toast.success("Enquiry received — reception will reply shortly");
-              (e.target as HTMLFormElement).reset();
+              openWhatsAppEnquiry(e.currentTarget);
+              toast.success("Opening WhatsApp with your enquiry");
             }}
             className="glass lux-border space-y-5 rounded-[2rem] p-8 sm:p-10"
           >
             <div className="grid gap-5 sm:grid-cols-2">
-              <input required placeholder="Full name" className="input-lux" />
-              <input required type="email" placeholder="Email" className="input-lux" />
-              <input placeholder="Phone" className="input-lux" />
-              <input placeholder="Vehicle" className="input-lux" />
+              <input required name="fullName" placeholder="Full name" className="input-lux" />
+              <input required name="email" type="email" placeholder="Email" className="input-lux" />
+              <input name="phone" placeholder="Phone" className="input-lux" />
+              <input name="vehicle" placeholder="Vehicle" className="input-lux" />
             </div>
             <textarea
               required
+              name="enquiry"
               rows={5}
               placeholder="What are you looking for?"
               className="input-lux resize-none"
@@ -62,8 +89,8 @@ function ContactPage() {
         <Reveal delay={0.1}>
           <div className="space-y-4">
             {[
-              [Phone, "Reception", "+91 98765 43210"],
-              [Mail, "Email", "atelier@moturbo.studio"],
+              [Phone, "Reception", "+91 8147702668"],
+              [Mail, "Email", "moturboweb@gmail.com"],
               [Clock, "Hours", "Mon–Sun · 08:00 — 20:00"],
             ].map(([Icon, label, value]) => {
               const I = Icon as typeof Phone;

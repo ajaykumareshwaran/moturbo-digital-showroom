@@ -22,9 +22,9 @@ export const Route = createFileRoute("/shop/$slug")({
     const p = loaderData.product;
     return {
       meta: [
-        { title: `${p.name} — MOTURBO Atelier` },
+        { title: `${p.name} — MOTURBO Workroom` },
         { name: "description", content: p.tagline },
-        { property: "og:title", content: `${p.name} — MOTURBO Atelier` },
+        { property: "og:title", content: `${p.name} — MOTURBO Workroom` },
         { property: "og:description", content: p.tagline },
       ],
     };
@@ -120,7 +120,7 @@ function ProductPage() {
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <div className="glass flex items-center gap-3 rounded-2xl px-5 py-4 text-xs text-muted-foreground">
-                <Truck className="size-4 text-gold/70" /> Concierge delivery in 48h
+                <Truck className="size-4 text-gold/70" /> Executive delivery in 48h
               </div>
               <div className="glass flex items-center gap-3 rounded-2xl px-5 py-4 text-xs text-muted-foreground">
                 <ShieldCheck className="size-4 text-gold/70" /> 24-month studio warranty
