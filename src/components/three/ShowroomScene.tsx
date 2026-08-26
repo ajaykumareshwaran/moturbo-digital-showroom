@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Float, MeshReflectorMaterial, Text, useGLTF, useTexture, Preload } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 const PURPLE = "#e8c37a";
@@ -11,6 +11,7 @@ const CARD = "#4a454f";
 type P = {
   progress: React.MutableRefObject<number>;
   pointer: React.MutableRefObject<{ x: number; y: number }>;
+  onReady?: () => void;
 };
 
 /* ---------- Stylised supercar built from primitives ---------- */
@@ -1938,7 +1939,7 @@ function Lights({ highQuality }: { highQuality: boolean }) {
   );
 }
 
-export default function ShowroomScene({ progress, pointer }: P) {
+export default function ShowroomScene({ progress, pointer, onReady }: P) {
   const profile = useMemo<QualityProfile>(() => {
     if (typeof window === "undefined") {
       return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
@@ -1961,6 +1962,14 @@ export default function ShowroomScene({ progress, pointer }: P) {
 
     return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
   }, []);
+
+  useEffect(() => {
+    if (!onReady) {
+      return;
+    }
+    const raf = window.requestAnimationFrame(() => onReady());
+    return () => window.cancelAnimationFrame(raf);
+  }, [onReady]);
 
   return (
     <Canvas
