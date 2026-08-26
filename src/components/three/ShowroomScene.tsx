@@ -1967,8 +1967,19 @@ export default function ShowroomScene({ progress, pointer, onReady }: P) {
     if (!onReady) {
       return;
     }
-    const raf = window.requestAnimationFrame(() => onReady());
-    return () => window.cancelAnimationFrame(raf);
+    let raf1 = 0;
+    let raf2 = 0;
+    let timeoutId = 0;
+    raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        timeoutId = window.setTimeout(() => onReady(), 220);
+      });
+    });
+    return () => {
+      if (raf1) window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
   }, [onReady]);
 
   return (
