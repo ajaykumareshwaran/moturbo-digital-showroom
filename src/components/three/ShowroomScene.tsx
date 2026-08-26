@@ -52,7 +52,7 @@ type QualityProfile = {
   highQuality: boolean;
   dpr: number | [number, number];
   antialias: boolean;
-  precision: "highp" | "mediump";
+  precision: "highp";
 };
 
 /* ---------- Detailing Lab niche — left wall ---------- */
@@ -1951,12 +1951,12 @@ export default function ShowroomScene({ progress, pointer }: P) {
 
     const ultraLowPower = isMobile && (cores <= 6 || memory <= 6 || prefersReducedMotion);
     if (ultraLowPower) {
-      return { highQuality: false, dpr: 0.62, antialias: false, precision: "mediump" };
+      return { highQuality: false, dpr: 0.9, antialias: false, precision: "highp" };
     }
 
     const lowPower = isMobile || cores <= 6 || memory <= 4 || prefersReducedMotion;
     if (lowPower) {
-      return { highQuality: false, dpr: 0.74, antialias: false, precision: "mediump" };
+      return { highQuality: false, dpr: 1, antialias: false, precision: "highp" };
     }
 
     return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
@@ -1978,7 +1978,7 @@ export default function ShowroomScene({ progress, pointer }: P) {
       <color attach="background" args={["#4a454f"]} />
       <fogExp2 attach="fog" args={["#4a454f", 0.012]} />
       <Lights highQuality={profile.highQuality} />
-      <Environment files="/dikhololo_night_1k.hdr" resolution={profile.highQuality ? 256 : 96} />
+      <Environment files="/dikhololo_night_1k.hdr" resolution={profile.highQuality ? 256 : 160} />
       <Float speed={1.1} rotationIntensity={0.06} floatIntensity={0.18}>
         <Car highQuality={profile.highQuality} />
       </Float>
