@@ -10,8 +10,6 @@ const showroomFallbackStyle = {
   backgroundPosition: "center",
 } as const;
 
-const SHUTTER_MIN_HOLD_MS = 2600;
-
 /**
  * Fixed full-screen showroom canvas. Scroll progress across the whole
  * cinematic section drives the Three.js camera, not the DOM.
@@ -22,13 +20,6 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
   const sceneLayerRef = useRef<HTMLDivElement>(null);
   const purpleLayerRef = useRef<HTMLDivElement>(null);
   const [sceneReady, setSceneReady] = useState(false);
-  const [holdElapsed, setHoldElapsed] = useState(false);
-  const shouldOpen = sceneReady && holdElapsed;
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => setHoldElapsed(true), SHUTTER_MIN_HOLD_MS);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
 
   useEffect(() => {
     const allowPointerParallax = !window.matchMedia("(pointer: coarse)").matches;
@@ -134,42 +125,42 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       </div>
 
       <div
-        className={`absolute inset-0 transition-opacity duration-700 ${shouldOpen ? "opacity-0" : "opacity-100"}`}
-        style={{ transitionDelay: shouldOpen ? "2000ms" : "0ms" }}
+        className={`absolute inset-0 transition-opacity duration-500 ${sceneReady ? "opacity-0" : "opacity-100"}`}
+        style={{ transitionDelay: sceneReady ? "1200ms" : "0ms" }}
       >
         <div
           className="absolute inset-x-0 top-0 h-1/2 border-b border-[#e8c37a33]"
           style={{
             background: "linear-gradient(180deg, rgba(18,15,22,0.98), rgba(31,27,37,0.96))",
-            transform: shouldOpen ? "translateY(-110%)" : "translateY(0)",
-            transition: "transform 2400ms cubic-bezier(0.19, 1, 0.22, 1)",
+            transform: sceneReady ? "translateY(-110%)" : "translateY(0)",
+            transition: "transform 1600ms cubic-bezier(0.19, 1, 0.22, 1)",
           }}
         />
         <div
           className="absolute inset-x-0 bottom-0 h-1/2 border-t border-[#e8c37a33]"
           style={{
             background: "linear-gradient(0deg, rgba(18,15,22,0.98), rgba(31,27,37,0.96))",
-            transform: shouldOpen ? "translateY(110%)" : "translateY(0)",
-            transition: "transform 2400ms cubic-bezier(0.19, 1, 0.22, 1)",
+            transform: sceneReady ? "translateY(110%)" : "translateY(0)",
+            transition: "transform 1600ms cubic-bezier(0.19, 1, 0.22, 1)",
           }}
         />
         <div
           className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#e8c37a66]"
           style={{
-            opacity: shouldOpen ? 0 : 1,
+            opacity: sceneReady ? 0 : 1,
             boxShadow: "0 0 24px rgba(232,195,122,0.65)",
-            transition: "opacity 450ms ease",
+            transition: "opacity 350ms ease",
           }}
         />
 
         <div
           className="absolute left-1/2 top-1/2 flex w-[84vw] max-w-xl -translate-x-1/2 -translate-y-1/2 flex-col items-center"
           style={{
-            opacity: shouldOpen ? 0 : 1,
-            transform: shouldOpen
+            opacity: sceneReady ? 0 : 1,
+            transform: sceneReady
               ? "translate(-50%, calc(-50% + 8px))"
               : "translate(-50%, -50%)",
-            transition: "opacity 500ms ease, transform 700ms ease",
+            transition: "opacity 400ms ease, transform 550ms ease",
           }}
         >
           <img
