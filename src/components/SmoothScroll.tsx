@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger.js";
 
 export function SmoothScroll() {
   useEffect(() => {
@@ -9,32 +7,67 @@ export function SmoothScroll() {
       return;
     }
 
+    let destroy: (() => void) | undefined;
+    let cancelled = false;
+
     // Defer Lenis initialization until after first paint
     const timeoutId = setTimeout(() => {
-      gsap.registerPlugin(ScrollTrigger);
-      
-      const lenis = new Lenis({ 
-        duration: 1.0, 
-        smoothWheel: true, 
-        lerp: 0.04,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        wheelMultiplier: 0.75
-      });
-      (window as unknown as { lenis?: Lenis }).lenis = lenis;
+      void (async () => {
+        const gsapModule = await import("gsap");
+        const scrollTriggerModule = await import("gsap/ScrollTrigger");
+        const gsap =
+          (gsapModule as { default?: unknown; gsap?: unknown }).default ??
+          (gsapModule as { default?: unknown; gsap?: unknown }).gsap;
+        const ScrollTrigger =
+          (scrollTriggerModule as { default?: unknown; ScrollTrigger?: unknown }).ScrollTrigger ??
+          (scrollTriggerModule as { default?: unknown; ScrollTrigger?: unknown }).default;
 
-      lenis.on("scroll", ScrollTrigger.update);
-      const raf = (time: number) => lenis.raf(time * 1000);
-      gsap.ticker.add(raf);
-      gsap.ticker.lagSmoothing(0);
+        if (!gsap || !ScrollTrigger || cancelled) {
+          return;
+        }
 
-      return () => {
-        gsap.ticker.remove(raf);
-        lenis.destroy();
-        ScrollTrigger.getAll().forEach((trigger: ScrollTrigger) => trigger.kill());
-      };
+        const gsapApi = gsap as {
+          registerPlugin: (plugin: unknown) => void;
+          ticker: {
+            add: (fn: (time: number) => void) => void;
+            remove: (fn: (time: number) => void) => void;
+            lagSmoothing: (threshold: number) => void;
+          };
+        };
+        const scrollTriggerApi = ScrollTrigger as {
+          update: () => void;
+          getAll: () => Array<{ kill: () => void }>;
+        };
+
+        gsapApi.registerPlugin(scrollTriggerApi);
+
+        const lenis = new Lenis({
+          duration: 1.0,
+          smoothWheel: true,
+          lerp: 0.04,
+                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          wheelMultiplier: 0.75,
+        });
+        (window as unknown as { lenis?: Lenis }).lenis = lenis;
+
+        lenis.on("scroll", scrollTriggerApi.update);
+        const raf = (time: number) => lenis.raf(time * 1000);
+        gsapApi.ticker.add(raf);
+        gsapApi.ticker.lagSmoothing(0);
+
+        destroy = () => {
+          gsapApi.ticker.remove(raf);
+          lenis.destroy();
+          scrollTriggerApi.getAll().forEach((trigger) => trigger.kill());
+        };
+      })();
     }, 100);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      destroy?.();
+    };
   }, []);
 
   return null;
