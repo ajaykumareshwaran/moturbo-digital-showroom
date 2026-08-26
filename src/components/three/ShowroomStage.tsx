@@ -3,6 +3,13 @@ import { ClientOnly } from "@/components/ClientOnly";
 
 const ShowroomScene = lazy(() => import("./ShowroomScene"));
 
+const showroomFallbackStyle = {
+  backgroundImage:
+    "linear-gradient(to bottom, rgba(74,69,79,0.82), rgba(74,69,79,0.98)), url('/showroom-bg.jpg')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+} as const;
+
 /**
  * Fixed full-screen showroom canvas. Scroll progress across the whole
  * cinematic section drives the Three.js camera, not the DOM.
@@ -106,8 +113,10 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       />
 
       <div ref={sceneLayerRef} className="absolute inset-0 transition-opacity duration-500">
-        <ClientOnly fallback={<div className="absolute inset-0 spotlight bg-noir" />}>
-          <Suspense fallback={<div className="absolute inset-0 spotlight bg-noir" />}>
+        <ClientOnly
+          fallback={<div className="absolute inset-0 spotlight bg-noir" style={showroomFallbackStyle} />}
+        >
+          <Suspense fallback={<div className="absolute inset-0 spotlight bg-noir" style={showroomFallbackStyle} />}>
             <ShowroomScene progress={progress} pointer={pointer} />
           </Suspense>
         </ClientOnly>

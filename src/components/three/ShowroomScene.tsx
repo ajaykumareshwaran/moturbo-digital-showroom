@@ -1988,5 +1988,5 @@ export default function ShowroomScene({ progress, pointer }: P) {
   );
 }
 
-// Note: Removed preload to defer car model loading until component mounts
-// useGLTF.preload("/models/car2.glb");
+useGLTF.preload("/models/car2.glb");
+useTexture.preload("/showroom-bg.jpg");

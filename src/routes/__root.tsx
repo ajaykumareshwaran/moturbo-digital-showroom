@@ -108,6 +108,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "preload", href: "/showroom-bg.jpg", as: "image" },
+      { rel: "preload", href: "/models/car2.glb", as: "fetch", crossOrigin: "anonymous" },
+      { rel: "preload", href: "/dikhololo_night_1k.hdr", as: "fetch", crossOrigin: "anonymous" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
@@ -133,6 +136,55 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nav = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+      deviceMemory?: number;
+    };
+    const connection = nav.connection;
+    const saveData = Boolean(connection?.saveData);
+    const verySlowNetwork = /(^|-)2g$/.test(connection?.effectiveType ?? "");
+    const lowMemory = (nav.deviceMemory ?? 8) <= 4;
+
+    if (saveData || verySlowNetwork) {
+      return;
+    }
+
+    const warm = () => {
+      // Warm route-critical 3D code and binary assets so the showroom appears faster.
+      void import("@/components/three/ShowroomStage");
+      void import("@/components/three/ShowroomScene");
+
+      const heroImg = new Image();
+      heroImg.src = "/showroom-bg.jpg";
+
+      if (!lowMemory) {
+        void fetch("/models/car2.glb", { cache: "force-cache" }).catch(() => undefined);
+        void fetch("/dikhololo_night_1k.hdr", { cache: "force-cache" }).catch(() => undefined);
+      }
+    };
+
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (w.requestIdleCallback) {
+      const idleId = w.requestIdleCallback(warm);
+      return () => {
+        if (w.cancelIdleCallback) {
+          w.cancelIdleCallback(idleId);
+        }
+      };
+    }
+
+    const timeoutId = window.setTimeout(warm, 350);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

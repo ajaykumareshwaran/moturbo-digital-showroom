@@ -80,7 +80,19 @@ function Index() {
   return (
     <>
       {/* ---------- Cinematic 3D showroom (lazy-loaded) ---------- */}
-      <Suspense fallback={<div className="pointer-events-none fixed inset-0 -z-10 bg-[#4a454f]" />}>
+      <Suspense
+        fallback={
+          <div
+            className="pointer-events-none fixed inset-0 -z-10 bg-[#4a454f]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to bottom, rgba(74,69,79,0.82), rgba(74,69,79,0.98)), url('/showroom-bg.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        }
+      >
         <ShowroomStage sectionRef={stageRef} />
       </Suspense>
 
