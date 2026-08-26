@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger.js";
 
 export function SmoothScroll() {
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     // Defer Lenis initialization until after first paint
     const timeoutId = setTimeout(() => {
       gsap.registerPlugin(ScrollTrigger);
@@ -26,7 +30,7 @@ export function SmoothScroll() {
       return () => {
         gsap.ticker.remove(raf);
         lenis.destroy();
-        ScrollTrigger.getAll().forEach((t) => t.kill());
+        ScrollTrigger.getAll().forEach((trigger: ScrollTrigger) => trigger.kill());
       };
     }, 100);
 
