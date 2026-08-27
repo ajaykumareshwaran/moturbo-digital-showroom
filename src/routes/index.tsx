@@ -182,22 +182,26 @@ function Index() {
         {CHAPTERS.map((c, i) => (
           <div
             key={c.title}
-            className={`relative flex h-screen items-center px-6 ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+            className={`relative flex px-6 ${
+              i === CHAPTERS.length - 1
+                ? "flex-col gap-8 pt-24 pb-14 sm:flex-row sm:h-screen sm:items-center sm:justify-end sm:pr-14 sm:pt-0 sm:pb-0 sm:gap-0"
+                : `h-screen items-center ${i % 2 === 0 ? "justify-start" : "justify-end"}`
+            }`}
           >
-            {/* Chapter 08: brand banner on the left */}
+            {/* Chapter 08: brand banner — absolute on desktop, stacked second on mobile */}
             {i === CHAPTERS.length - 1 && (
               <Reveal
-                className="absolute left-6 top-1/2 w-[42%] -translate-y-1/2"
+                className="w-full order-2 sm:order-none sm:absolute sm:left-6 sm:top-1/2 sm:w-[50%] sm:-translate-y-1/2"
                 y={30}
                 delay={0.1}
               >
-                <div className="glass-strong lux-border rounded-3xl p-8 flex flex-col gap-6">
+                <div className="glass-strong lux-border rounded-3xl p-8 sm:p-10 flex flex-col gap-7">
                   {/* Logo mark */}
-                  <div className="flex items-center gap-3">
-                    <img src="/moturbo_lg.png" alt="MOTURBO" className="h-12 w-12 object-contain" style={{ mixBlendMode: "screen" }} />
+                  <div className="flex items-center gap-4">
+                    <img src="/moturbo_lg.png" alt="MOTURBO" className="h-14 w-14 object-contain" style={{ mixBlendMode: "screen" }} />
                     <div>
-                      <div className="font-display text-xs font-black tracking-[0.32em] text-chrome">MOTURBO</div>
-                      <div className="font-display text-[0.55rem] tracking-[0.22em] text-gold uppercase">Precision · Passion · Performance</div>
+                      <div className="font-display text-sm font-black tracking-[0.32em] text-chrome">MOTURBO</div>
+                      <div className="font-display text-[0.62rem] tracking-[0.22em] text-gold uppercase">Precision · Passion · Performance</div>
                     </div>
                   </div>
 
@@ -208,7 +212,7 @@ function Index() {
                     <div className="eyebrow mb-3">What we do</div>
                     <div className="flex flex-wrap gap-2">
                       {["Ceramic Coating", "Paint Correction", "PPF", "Wrapping", "Window Tinting", "Wheel Refinishing", "Interior Detailing", "Accessories"].map((tag) => (
-                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-display text-[0.58rem] tracking-[0.14em] text-silver uppercase">
+                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 font-display text-[0.62rem] tracking-[0.14em] text-silver uppercase">
                           {tag}
                         </span>
                       ))}
@@ -221,19 +225,26 @@ function Index() {
                   <div className="grid grid-cols-3 gap-4 text-center">
                     {[["1000+", "Vehicles"], ["13", "Disciplines"], ["1", "Branch Currently"]].map(([val, label]) => (
                       <div key={label}>
-                        <div className="font-display text-xl font-bold text-gold">{val}</div>
-                        <div className="mt-0.5 font-display text-[0.52rem] tracking-[0.18em] text-muted-foreground uppercase">{label}</div>
+                        <div className="font-display text-2xl font-bold text-gold">{val}</div>
+                        <div className="mt-1 font-display text-[0.58rem] tracking-[0.18em] text-muted-foreground uppercase">{label}</div>
                       </div>
                     ))}
                   </div>
                 </div>
               </Reveal>
             )}
-            <Reveal className="glass-strong lux-border relative z-10 w-full max-w-md rounded-3xl p-8" y={40}>
+            <Reveal className="glass-strong lux-border relative z-10 w-full max-w-md rounded-3xl p-8 order-1 sm:order-none" y={40}>
               <div className="eyebrow">{c.eyebrow}</div>
               <h2 className="mt-4 text-3xl leading-tight font-semibold">{c.title}</h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
               <div className="hairline mt-6 w-24" />
+              {i === CHAPTERS.length - 1 && (
+                <div className="mt-6">
+                  <LuxLink to="/book">
+                    Book Appointment <ArrowRight className="size-3.5" />
+                  </LuxLink>
+                </div>
+              )}
             </Reveal>
           </div>
         ))}

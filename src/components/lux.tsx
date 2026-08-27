@@ -17,11 +17,16 @@ export function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12% 0px" });
+  // filter:blur() forces a GPU composite layer on every element it touches.
+  // On touch/mobile GPUs this tanks scroll fps — skip it on coarse-pointer devices.
+  const [skipBlur] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+  );
   return (
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y, filter: "blur(8px)" }}
+      initial={{ opacity: 0, y, filter: skipBlur ? "blur(0px)" : "blur(8px)" }}
       animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
     >

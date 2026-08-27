@@ -20,6 +20,10 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
   const sceneLayerRef = useRef<HTMLDivElement>(null);
   const purpleLayerRef = useRef<HTMLDivElement>(null);
   const [sceneReady, setSceneReady] = useState(false);
+  const [framePaused, setFramePaused] = useState(false);
+  // Tracks the pending setTimeout that schedules the pause so we can cancel it
+  // if the user scrolls back before the fade-out timer fires.
+  const pausePendingRef = useRef<number | null>(null);
 
   useEffect(() => {
     const allowPointerParallax = !window.matchMedia("(pointer: coarse)").matches;
@@ -32,9 +36,27 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
     const setLayerOpacity = (sceneOpacity: number, purpleOpacity: number) => {
       if (sceneLayerRef.current) {
         sceneLayerRef.current.style.opacity = String(sceneOpacity);
+        // Compositor hint: skip this layer entirely when fully transparent.
+        sceneLayerRef.current.style.visibility = sceneOpacity < 0.01 ? "hidden" : "";
       }
       if (purpleLayerRef.current) {
         purpleLayerRef.current.style.opacity = String(purpleOpacity);
+      }
+      // When the canvas is fully faded, schedule a pause of the WebGL render loop
+      // (saves GPU cycles). Cancel if the user scrolls back before it fires.
+      if (sceneOpacity < 0.01) {
+        if (pausePendingRef.current === null) {
+          pausePendingRef.current = window.setTimeout(() => {
+            setFramePaused(true);
+            pausePendingRef.current = null;
+          }, 600);
+        }
+      } else {
+        if (pausePendingRef.current !== null) {
+          clearTimeout(pausePendingRef.current);
+          pausePendingRef.current = null;
+        }
+        setFramePaused(false);
       }
     };
 
@@ -92,6 +114,7 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       if (moveRaf) window.cancelAnimationFrame(moveRaf);
       if (settleRaf) window.cancelAnimationFrame(settleRaf);
       if (settleRaf2) window.cancelAnimationFrame(settleRaf2);
+      if (pausePendingRef.current !== null) clearTimeout(pausePendingRef.current);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (allowPointerParallax) {
@@ -118,7 +141,7 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
           fallback={<div className="absolute inset-0 spotlight bg-noir" style={showroomFallbackStyle} />}
         >
           <Suspense fallback={<div className="absolute inset-0 spotlight bg-noir" style={showroomFallbackStyle} />}>
-            <ShowroomScene progress={progress} pointer={pointer} onReady={() => setSceneReady(true)} />
+            <ShowroomScene progress={progress} pointer={pointer} onReady={() => setSceneReady(true)} paused={framePaused} />
           </Suspense>
         </ClientOnly>
         <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_50%,transparent_35%,oklch(0.09_0.012_300/85%))]" />

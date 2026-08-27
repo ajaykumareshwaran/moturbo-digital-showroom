@@ -12,26 +12,29 @@ type P = {
   progress: React.MutableRefObject<number>;
   pointer: React.MutableRefObject<{ x: number; y: number }>;
   onReady?: () => void;
+  /** When true, R3F switches to demand-based rendering — used when the scene is faded out. */
+  paused?: boolean;
 };
 
 /* ---------- Stylised supercar built from primitives ---------- */
-function Car({ highQuality }: { highQuality: boolean }) {
+function Car({ highQuality, progress }: { highQuality: boolean; progress: React.MutableRefObject<number> }) {
   const group = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/models/car2.glb", undefined);
+  const { scene } = useGLTF("/models/car2.glb");
   const accumulated = useRef(0);
 
-  const model = useMemo(() => {
-    const cloned = scene.clone(true);
-    cloned.traverse((obj) => {
+  // Configure shadow flags directly — no clone needed, saves ~half the model RAM.
+  useEffect(() => {
+    scene.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
         obj.castShadow = highQuality;
         obj.receiveShadow = highQuality;
       }
     });
-    return cloned;
   }, [scene, highQuality]);
 
   useFrame((_, dt) => {
+    // Skip rotation when the scene is faded out — no-op saves CPU + overdraw.
+    if (progress.current >= 0.93) return;
     accumulated.current += dt;
     const tick = highQuality ? 1 / 60 : 1 / 30;
     if (accumulated.current < tick) {
@@ -44,23 +47,27 @@ function Car({ highQuality }: { highQuality: boolean }) {
 
   return (
     <group ref={group} position={[0, 0.08, 0]}>
-      <primitive object={model} scale={5.15} />
+      <primitive object={scene} scale={5.15} />
     </group>
   );
 }
 
 type QualityProfile = {
+  tier: "high" | "medium" | "low";
   highQuality: boolean;
   dpr: number | [number, number];
   antialias: boolean;
   precision: "highp";
+  fov: number;
+  floatAnimations: boolean;
 };
 
 /* ---------- Detailing Lab niche — left wall ---------- */
-function DetailingLabNiche() {
+function DetailingLabNiche({ animate }: { animate: boolean }) {
   const floatRef = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (floatRef.current) floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.5) * 0.006;
+    if (!animate || !floatRef.current) return;
+    floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.5) * 0.006;
   });
   return (
     <group position={[-10.55, 3.1, -9.5]}>
@@ -285,11 +292,11 @@ function DetailingLabNiche() {
 }
 
 /* ---------- Accessory Workroom niche — right wall ---------- */
-function AccessoryWorkroomNiche() {
+function AccessoryWorkroomNiche({ animate }: { animate: boolean }) {
   const floatRef = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (floatRef.current)
-      floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.44 + 1.1) * 0.006;
+    if (!animate || !floatRef.current) return;
+    floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.44 + 1.1) * 0.006;
   });
   return (
     <group position={[10.55, 3.1, -9.5]}>
@@ -566,7 +573,7 @@ function AccessoryWorkroomNiche() {
   );
 }
 
-function CenterCinematicWallDisplay() {
+function CenterCinematicWallDisplay({ animate }: { animate: boolean }) {
   const sweepRef = useRef<THREE.Mesh>(null);
   const showroomPhoto = useTexture("/showroom-bg.jpg");
 
@@ -577,9 +584,8 @@ function CenterCinematicWallDisplay() {
   }, [showroomPhoto]);
 
   useFrame(({ clock }) => {
-    if (sweepRef.current) {
-      sweepRef.current.position.x = Math.sin(clock.elapsedTime * 0.55) * 2.2;
-    }
+    if (!animate || !sweepRef.current) return;
+    sweepRef.current.position.x = Math.sin(clock.elapsedTime * 0.55) * 2.2;
   });
 
   return (
@@ -676,13 +682,12 @@ function CenterCinematicWallDisplay() {
   );
 }
 
-function SideAccessoryRack({ x, z, seed }: { x: number; z: number; seed: number }) {
+function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed: number; animate: boolean }) {
   const floatRef = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
-    if (floatRef.current) {
-      floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.42 + seed) * 0.004;
-    }
+    if (!animate || !floatRef.current) return;
+    floatRef.current.position.y = Math.sin(clock.elapsedTime * 0.42 + seed) * 0.004;
   });
 
   const side = x < 0 ? -1 : 1;
@@ -863,7 +868,7 @@ function SideAccessoryRack({ x, z, seed }: { x: number; z: number; seed: number 
 }
 
 /* ---------- Showroom architecture ---------- */
-function Showroom({ highQuality }: { highQuality: boolean }) {
+function Showroom({ highQuality, tier, floatAnimations }: { highQuality: boolean; tier: "high" | "medium" | "low"; floatAnimations: boolean }) {
   const strips = useMemo(() => [-9, -4.5, 0, 4.5, 9, 13.5, 18], []);
   const wallStrips = useMemo(
     (): [number, number, number, number, number, number][] => [
@@ -887,22 +892,26 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
   const productTones = useMemo(() => ["#111111", "#242424", "#c7a24f", "#f3f3f3"], []);
   return (
     <group>
-      {/* reflective studio floor (artifact-safe settings) */}
+      {/* reflective studio floor — cheaper flat material on LOW tier */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[120, 120]} />
-        <MeshReflectorMaterial
-          blur={[80, 20]}
-          resolution={highQuality ? 512 : 256}
-          mixBlur={0.15}
-          mixStrength={8}
-          roughness={0.5}
-          depthScale={0.2}
-          minDepthThreshold={0.6}
-          maxDepthThreshold={1.2}
-          color="#b9b7bb"
-          metalness={0.08}
-          mirror={0.05}
-        />
+        {tier === "low" ? (
+          <meshStandardMaterial color="#b9b7bb" roughness={0.12} metalness={0.45} />
+        ) : (
+          <MeshReflectorMaterial
+            blur={tier === "medium" ? [40, 10] : [80, 20]}
+            resolution={highQuality ? 512 : 256}
+            mixBlur={0.15}
+            mixStrength={tier === "medium" ? 5 : 8}
+            roughness={0.5}
+            depthScale={0.2}
+            minDepthThreshold={0.6}
+            maxDepthThreshold={1.2}
+            color="#b9b7bb"
+            metalness={0.08}
+            mirror={0.05}
+          />
+        )}
       </mesh>
 
       {/* gold LED ceiling strips */}
@@ -923,7 +932,7 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
             <boxGeometry args={[26, 0.14, 0.22]} />
             <meshBasicMaterial color={GOLD} transparent opacity={0.16} toneMapped={false} />
           </mesh>
-          <pointLight position={[0, 6.1, z]} intensity={8} color={GOLD} distance={16} decay={2} />
+          {highQuality && <pointLight position={[0, 6.1, z]} intensity={8} color={GOLD} distance={16} decay={2} />}
         </group>
       ))}
 
@@ -953,13 +962,15 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
             <boxGeometry args={[w + 0.08, h + 0.12, d + 0.03]} />
             <meshBasicMaterial color={GOLD} transparent opacity={0.12} toneMapped={false} />
           </mesh>
-          <pointLight
-            position={[0, 0, 0.1]}
-            intensity={2.6}
-            color={GOLD}
-            distance={4.5}
-            decay={2}
-          />
+          {highQuality && (
+            <pointLight
+              position={[0, 0, 0.1]}
+              intensity={2.6}
+              color={GOLD}
+              distance={4.5}
+              decay={2}
+            />
+          )}
         </group>
       ))}
 
@@ -985,9 +996,9 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
       ))}
 
       {/* Premium architectural wall niche displays */}
-      <DetailingLabNiche />
-      <AccessoryWorkroomNiche />
-      <CenterCinematicWallDisplay />
+      <DetailingLabNiche animate={floatAnimations} />
+      <AccessoryWorkroomNiche animate={floatAnimations} />
+      <CenterCinematicWallDisplay animate={floatAnimations} />
       {[
         { x: -10.55, z: -6.2, seed: 1 },
         { x: -10.55, z: 1.6, seed: 2 },
@@ -1001,21 +1012,21 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
         { x: 10.55, z: 16.8, seed: 7 },
         { x: 10.55, z: 22.1, seed: 8 },
       ].map((rack) => (
-        <SideAccessoryRack key={`${rack.x}-${rack.z}`} x={rack.x} z={rack.z} seed={rack.seed} />
+        <SideAccessoryRack key={`${rack.x}-${rack.z}`} x={rack.x} z={rack.z} seed={rack.seed} animate={floatAnimations} />
       ))}
 
       {/* highlighted lounge platform + table set */}
       <group position={[8.6, 0.02, 12.8]}>
         <mesh position={[0, 0.16, 0]}>
-          <cylinderGeometry args={[2.95, 3.2, 0.3, 60]} />
+          <cylinderGeometry args={[2.95, 3.2, 0.3, 32]} />
           <meshStandardMaterial color="#2a272f" roughness={0.58} metalness={0.18} />
         </mesh>
         <mesh position={[0, 0.41, 0]}>
-          <cylinderGeometry args={[1.65, 1.85, 0.22, 60]} />
+          <cylinderGeometry args={[1.65, 1.85, 0.22, 32]} />
           <meshStandardMaterial color="#1f1e24" roughness={0.5} metalness={0.22} />
         </mesh>
         <mesh position={[0, 0.39, 0]}>
-          <torusGeometry args={[1.77, 0.028, 12, 72]} />
+          <torusGeometry args={[1.77, 0.028, 12, 36]} />
           <meshStandardMaterial
             color={GOLD}
             emissive={GOLD}
@@ -1026,7 +1037,7 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
           />
         </mesh>
         <mesh position={[0, 0.49, 0]}>
-          <cylinderGeometry args={[1.2, 1.22, 0.08, 48]} />
+          <cylinderGeometry args={[1.2, 1.22, 0.08, 24]} />
           <meshStandardMaterial color="#1b1d26" roughness={0.18} metalness={0.55} />
         </mesh>
         <mesh position={[0.55, 0.57, -0.1]}>
@@ -1507,7 +1518,7 @@ function Showroom({ highQuality }: { highQuality: boolean }) {
       {/* detailing bay plinths ahead */}
       {[7, 12, 17].map((z, i) => (
         <mesh key={`plinth${i}`} position={[i % 2 === 0 ? 4.5 : -4.5, 0.12, z]}>
-          <cylinderGeometry args={[1.5, 1.7, 0.24, 48]} />
+          <cylinderGeometry args={[1.5, 1.7, 0.24, 24]} />
           <meshStandardMaterial
             color="#5a5560"
             metalness={0.2}
@@ -1871,6 +1882,8 @@ const KEYS: { pos: [number, number, number]; look: [number, number, number] }[] 
 function CameraRig({ progress, pointer }: P) {
   const target = useRef(new THREE.Vector3(0, 1, 0));
   useFrame(({ camera }, dt) => {
+    // Stop camera math when scene is faded — eliminates lerp + matrix work every frame.
+    if (progress.current >= 0.93) return;
     const p = THREE.MathUtils.clamp(progress.current, 0, 0.9999);
     const f = p * (KEYS.length - 1);
     const i = Math.floor(f);
@@ -1897,10 +1910,12 @@ function CameraRig({ progress, pointer }: P) {
   return null;
 }
 
-function Lights({ highQuality }: { highQuality: boolean }) {
+function Lights({ highQuality, progress }: { highQuality: boolean; progress: React.MutableRefObject<number> }) {
   const spot = useRef<THREE.SpotLight>(null);
   const accumulated = useRef(0);
   useFrame(({ clock }, dt) => {
+    // Skip intensity animation when the scene is faded — zero GPU/CPU cost.
+    if (progress.current >= 0.93) return;
     accumulated.current += dt;
     const tick = highQuality ? 1 / 60 : 1 / 24;
     if (accumulated.current < tick) {
@@ -1939,28 +1954,32 @@ function Lights({ highQuality }: { highQuality: boolean }) {
   );
 }
 
-export default function ShowroomScene({ progress, pointer, onReady }: P) {
+export default function ShowroomScene({ progress, pointer, onReady, paused = false }: P) {
   const profile = useMemo<QualityProfile>(() => {
     if (typeof window === "undefined") {
-      return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
+      return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp", fov: 42, floatAnimations: true };
     }
 
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const isTablet = !isMobile && window.matchMedia("(max-width: 1199px)").matches;
     const cores = navigator.hardwareConcurrency ?? 8;
     const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const ultraLowPower = isMobile && (cores <= 6 || memory <= 6 || prefersReducedMotion);
-    if (ultraLowPower) {
-      return { highQuality: false, dpr: 0.9, antialias: false, precision: "highp" };
+    // LOW — ultra weak mobile (old phones, 2–4 GB devices)
+    if (isMobile && (cores <= 6 || memory <= 6 || prefersReducedMotion)) {
+      return { tier: "low", highQuality: false, dpr: 0.7, antialias: false, precision: "highp", fov: 52, floatAnimations: false };
     }
-
-    const lowPower = isMobile || cores <= 6 || memory <= 4 || prefersReducedMotion;
-    if (lowPower) {
-      return { highQuality: false, dpr: 1, antialias: false, precision: "highp" };
+    // LOW — all other mobile
+    if (isMobile) {
+      return { tier: "low", highQuality: false, dpr: 0.85, antialias: false, precision: "highp", fov: 50, floatAnimations: false };
     }
-
-    return { highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp" };
+    // MEDIUM — tablet, laptop, or low-core desktop
+    if (isTablet || cores <= 6 || memory <= 4 || prefersReducedMotion) {
+      return { tier: "medium", highQuality: false, dpr: 1.0, antialias: true, precision: "highp", fov: 46, floatAnimations: true };
+    }
+    // HIGH — desktop with a capable GPU
+    return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp", fov: 42, floatAnimations: true };
   }, []);
 
   useEffect(() => {
@@ -1981,21 +2000,29 @@ export default function ShowroomScene({ progress, pointer, onReady }: P) {
         precision: profile.precision,
         alpha: false,
       }}
-      performance={{ min: 0.5, max: 1, debounce: 500 }}
-      camera={{ position: [0, 2.6, 13], fov: 42, near: 0.1, far: 200 }}
+      performance={{ min: 0.4, max: 1, debounce: 300 }}
+      // frameloop: pause the RAF loop when the canvas is fully faded (saves GPU cycles).
+      frameloop={paused ? "demand" : "always"}
+      // far:55 matches real scene depth (~35 units) — tighter clip improves depth-buffer precision.
+      camera={{ position: [0, 2.6, 13], fov: profile.fov, near: 0.1, far: 55 }}
     >
       <color attach="background" args={["#4a454f"]} />
       <fogExp2 attach="fog" args={["#4a454f", 0.012]} />
-      <Lights highQuality={profile.highQuality} />
+      <Lights highQuality={profile.highQuality} progress={progress} />
       <Environment files="/dikhololo_night_1k.hdr" resolution={profile.highQuality ? 256 : 160} />
-      <Float speed={1.1} rotationIntensity={0.06} floatIntensity={0.18}>
-        <Car highQuality={profile.highQuality} />
-      </Float>
-      <Showroom highQuality={profile.highQuality} />
+      {profile.tier === "low" ? (
+        <Car highQuality={profile.highQuality} progress={progress} />
+      ) : (
+        <Float speed={1.1} rotationIntensity={0.06} floatIntensity={0.18}>
+          <Car highQuality={profile.highQuality} progress={progress} />
+        </Float>
+      )}
+      <Showroom highQuality={profile.highQuality} tier={profile.tier} floatAnimations={profile.floatAnimations} />
       <CameraRig progress={progress} pointer={pointer} />
     </Canvas>
   );
 }
 
+useGLTF.setDecoderPath("/draco/gltf/");
 useGLTF.preload("/models/car2.glb");
 useTexture.preload("/showroom-bg.jpg");

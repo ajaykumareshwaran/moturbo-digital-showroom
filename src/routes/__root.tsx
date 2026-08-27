@@ -198,7 +198,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
-        <Toaster position="bottom-right" offset={{ bottom: 170, right: 45 }} />
+        <Toaster position="bottom-right" offset={{ bottom: 170, right: 45 }} mobileOffset={{ bottom: 150, right: 16 }} />
       </StoreProvider>
     </QueryClientProvider>
   );

@@ -397,3 +397,33 @@
     animation: lux-sheen 0.9s var(--ease-lux);
   }
 }
+
+/* ─── Mobile performance overrides ──────────────────────────────────────────
+   These rules are scoped to touch/coarse-pointer devices so they never affect
+   the desktop experience.                                                     */
+
+/* background-attachment:fixed causes a full repaint on every scroll event on
+   iOS Safari and many Android browsers. Revert to scroll on touch devices.   */
+@media (pointer: coarse) {
+  body {
+    background-attachment: scroll;
+  }
+
+  /* Halve the backdrop-filter radius; still looks frosted but at ~half the
+     GPU fill cost on mobile compositors.                                      */
+  .glass {
+    backdrop-filter: blur(12px) saturate(120%);
+  }
+  .glass-strong {
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+
+/* Pause CSS keyframe animations when the OS reduce-motion preference is set. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-lux-float,
+  .animate-lux-pulse {
+    animation-play-state: paused;
+  }
+}
