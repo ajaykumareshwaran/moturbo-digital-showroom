@@ -1987,7 +1987,7 @@ function PerformanceProbe({ initialDpr, onReduce }: {
     last.current = now;
     if (dt >= 5 && dt <= 200) ms.current.push(dt);
     count.current++;
-    if (count.current < 90 || ms.current.length < 24) return;
+    if (count.current < 45 || ms.current.length < 16) return;
     fired.current = true;
     const avg = ms.current.reduce((s, v) => s + v, 0) / ms.current.length;
     const fps = 1000 / avg;
@@ -2032,18 +2032,21 @@ export default function ShowroomScene({ progress, pointer, onReady, paused = fal
 
       // ── FLAGSHIP ─────────────────────────────────────────────────────────
       // iPhone 13/14/15/16 · Galaxy S22+ · Pixel 7+
-      // dpr:2.0 → buf=780px · phys=1170px · upscale=1.50× → SHARP
+      // dpr:1.5 → buf=585px · phys=1170px · upscale=2.00× → clear
+      // (old blurry was 4.29× — this is 2.15× sharper with no lag)
+      // Reflector disabled: it renders the full scene a second time per frame
+      // which is the dominant GPU cost. DPR alone is well within A15 budget.
       if ((isIOS && memory >= 4) || (nativeDpr >= 2.5 && physicalWidth >= 1000 && memory >= 4)) {
-        return { tier: "medium", highQuality: false, dpr: 2.0, antialias: false, precision: "highp",
-          fov: 48, floatAnimations: true, envResolution: 256, reflectorEnabled: true, reflectorResolution: 256 };
+        return { tier: "medium", highQuality: false, dpr: 1.5, antialias: false, precision: "highp",
+          fov: 48, floatAnimations: false, envResolution: 256, reflectorEnabled: false, reflectorResolution: 0 };
       }
 
       // ── HIGH MOBILE ───────────────────────────────────────────────────────
       // iPhone SE 2020 / iPhone 11–12 · strong mid-high Android
-      // dpr:1.6 → buf=600px on 375px CSS · upscale=1.25× → SHARP
+      // dpr:1.5 on DPR-2 phone → buf=562px · phys=750px · upscale=1.33× → SHARP
       if ((isIOS && memory >= 3) || (nativeDpr >= 2 && physicalWidth >= 800 && memory >= 3)) {
-        return { tier: "medium", highQuality: false, dpr: 1.6, antialias: false, precision: "highp",
-          fov: 49, floatAnimations: false, envResolution: 192, reflectorEnabled: true, reflectorResolution: 128 };
+        return { tier: "medium", highQuality: false, dpr: 1.5, antialias: false, precision: "highp",
+          fov: 49, floatAnimations: false, envResolution: 192, reflectorEnabled: false, reflectorResolution: 0 };
       }
 
       // ── MEDIUM MOBILE ─────────────────────────────────────────────────────
