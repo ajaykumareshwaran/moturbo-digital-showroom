@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Float, MeshReflectorMaterial, Text, useGLTF, useTexture, Preload } from "@react-three/drei";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 const PURPLE = "#e8c37a";
@@ -60,6 +60,12 @@ type QualityProfile = {
   precision: "highp";
   fov: number;
   floatAnimations: boolean;
+  /** HDR environment map resolution. Higher = richer IBL lighting. */
+  envResolution: number;
+  /** Enable the reflective floor material (skip on low-end mobile). */
+  reflectorEnabled: boolean;
+  /** Resolution of the reflector render target when enabled. */
+  reflectorResolution: number;
 };
 
 /* ---------- Detailing Lab niche — left wall ---------- */
@@ -868,7 +874,13 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
 }
 
 /* ---------- Showroom architecture ---------- */
-function Showroom({ highQuality, tier, floatAnimations }: { highQuality: boolean; tier: "high" | "medium" | "low"; floatAnimations: boolean }) {
+function Showroom({ highQuality, tier, floatAnimations, reflectorEnabled, reflectorResolution }: {
+  highQuality: boolean;
+  tier: "high" | "medium" | "low";
+  floatAnimations: boolean;
+  reflectorEnabled: boolean;
+  reflectorResolution: number;
+}) {
   const strips = useMemo(() => [-9, -4.5, 0, 4.5, 9, 13.5, 18], []);
   const wallStrips = useMemo(
     (): [number, number, number, number, number, number][] => [
@@ -892,17 +904,17 @@ function Showroom({ highQuality, tier, floatAnimations }: { highQuality: boolean
   const productTones = useMemo(() => ["#111111", "#242424", "#c7a24f", "#f3f3f3"], []);
   return (
     <group>
-      {/* reflective studio floor — cheaper flat material on LOW tier */}
+      {/* reflective studio floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[120, 120]} />
-        {tier === "low" ? (
+        {!reflectorEnabled ? (
           <meshStandardMaterial color="#b9b7bb" roughness={0.12} metalness={0.45} />
         ) : (
           <MeshReflectorMaterial
-            blur={tier === "medium" ? [40, 10] : [80, 20]}
-            resolution={highQuality ? 512 : 256}
+            blur={[40, 10]}
+            resolution={reflectorResolution}
             mixBlur={0.15}
-            mixStrength={tier === "medium" ? 5 : 8}
+            mixStrength={highQuality ? 8 : 5}
             roughness={0.5}
             depthScale={0.2}
             minDepthThreshold={0.6}
@@ -1954,10 +1966,46 @@ function Lights({ highQuality, progress }: { highQuality: boolean; progress: Rea
   );
 }
 
+/**
+ * One-shot FPS probe inside the Canvas. Runs for ~1.5 s after the scene loads,
+ * then — if average FPS < 48 — gently reduces the WebGL pixel ratio so R3F
+ * re-sizes the drawing buffer while CSS canvas dimensions stay intact.
+ * Only fires once per mount; refs prevent re-triggering on re-renders.
+ */
+function PerformanceProbe({ initialDpr, onReduce }: {
+  initialDpr: number;
+  onReduce: (dpr: number) => void;
+}) {
+  const count = useRef(0);
+  const ms    = useRef<number[]>([]);
+  const last  = useRef(performance.now());
+  const fired = useRef(false);
+  useFrame(() => {
+    if (fired.current) return;
+    const now = performance.now();
+    const dt  = now - last.current;
+    last.current = now;
+    if (dt >= 5 && dt <= 200) ms.current.push(dt);
+    count.current++;
+    if (count.current < 90 || ms.current.length < 24) return;
+    fired.current = true;
+    const avg = ms.current.reduce((s, v) => s + v, 0) / ms.current.length;
+    const fps = 1000 / avg;
+    if (fps < 48) {
+      // Prefer gentle pixel-count reductions over drastic drops.
+      const factor = Math.max(0.55, Math.sqrt(fps / 48));
+      const newDpr = Math.max(0.75, Math.round(initialDpr * factor * 20) / 20);
+      if (newDpr < initialDpr - 0.09) onReduce(newDpr);
+    }
+  });
+  return null;
+}
+
 export default function ShowroomScene({ progress, pointer, onReady, paused = false }: P) {
   const profile = useMemo<QualityProfile>(() => {
     if (typeof window === "undefined") {
-      return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp", fov: 42, floatAnimations: true };
+      return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp",
+        fov: 42, floatAnimations: true, envResolution: 256, reflectorEnabled: true, reflectorResolution: 512 };
     }
 
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -1966,21 +2014,73 @@ export default function ShowroomScene({ progress, pointer, onReady, paused = fal
     const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // LOW — ultra weak mobile (old phones, 2–4 GB devices)
-    if (isMobile && (cores <= 6 || memory <= 6 || prefersReducedMotion)) {
-      return { tier: "low", highQuality: false, dpr: 0.7, antialias: false, precision: "highp", fov: 52, floatAnimations: false };
-    }
-    // LOW — all other mobile
     if (isMobile) {
-      return { tier: "low", highQuality: false, dpr: 0.85, antialias: false, precision: "highp", fov: 50, floatAnimations: false };
+      // physicalWidth = devicePixelRatio × CSS screen.width.
+      // A high-DPR, high-resolution screen requires a capable GPU to drive it —
+      // far more reliable than hardwareConcurrency (which misclassifies iPhones).
+      // iOS Safari never exposes navigator.deviceMemory → defaults to 8 here.
+      const nativeDpr     = window.devicePixelRatio ?? 1;
+      const physicalWidth = (window.screen?.width ?? 390) * nativeDpr;
+      const isIOS         = /iPhone|iPod/.test(navigator.userAgent);
+
+      // ── MINIMAL ─────────────────────────────────────────────────────────
+      // Forced minimum: user preference or genuinely constrained hardware.
+      if (prefersReducedMotion || memory <= 1) {
+        return { tier: "low", highQuality: false, dpr: 0.9, antialias: false, precision: "highp",
+          fov: 52, floatAnimations: false, envResolution: 64, reflectorEnabled: false, reflectorResolution: 0 };
+      }
+
+      // ── FLAGSHIP ─────────────────────────────────────────────────────────
+      // iPhone 13/14/15/16 · Galaxy S22+ · Pixel 7+
+      // dpr:2.0 → buf=780px · phys=1170px · upscale=1.50× → SHARP
+      if ((isIOS && memory >= 4) || (nativeDpr >= 2.5 && physicalWidth >= 1000 && memory >= 4)) {
+        return { tier: "medium", highQuality: false, dpr: 2.0, antialias: false, precision: "highp",
+          fov: 48, floatAnimations: true, envResolution: 256, reflectorEnabled: true, reflectorResolution: 256 };
+      }
+
+      // ── HIGH MOBILE ───────────────────────────────────────────────────────
+      // iPhone SE 2020 / iPhone 11–12 · strong mid-high Android
+      // dpr:1.6 → buf=600px on 375px CSS · upscale=1.25× → SHARP
+      if ((isIOS && memory >= 3) || (nativeDpr >= 2 && physicalWidth >= 800 && memory >= 3)) {
+        return { tier: "medium", highQuality: false, dpr: 1.6, antialias: false, precision: "highp",
+          fov: 49, floatAnimations: false, envResolution: 192, reflectorEnabled: true, reflectorResolution: 128 };
+      }
+
+      // ── MEDIUM MOBILE ─────────────────────────────────────────────────────
+      // Solid mid-range: DPR 2, physicalWidth ≥ 680, memory ≥ 2
+      // dpr:1.4 → buf=504px on 360px CSS · upscale=1.43× → SHARP
+      if (isIOS || (nativeDpr >= 2 && physicalWidth >= 680 && memory >= 2)) {
+        return { tier: "low", highQuality: false, dpr: 1.4, antialias: false, precision: "highp",
+          fov: 50, floatAnimations: false, envResolution: 128, reflectorEnabled: false, reflectorResolution: 0 };
+      }
+
+      // ── LOW MOBILE ────────────────────────────────────────────────────────
+      // Budget phones: DPR 1.5–2, reasonable screen width
+      // dpr:1.1 → buf=396px on 360px CSS at DPR 1.5 · upscale=1.36× → SHARP
+      if (nativeDpr >= 1.5 && physicalWidth >= 500) {
+        return { tier: "low", highQuality: false, dpr: 1.1, antialias: false, precision: "highp",
+          fov: 51, floatAnimations: false, envResolution: 96, reflectorEnabled: false, reflectorResolution: 0 };
+      }
+
+      // ── VERY LOW / OLD ────────────────────────────────────────────────────
+      return { tier: "low", highQuality: false, dpr: 0.9, antialias: false, precision: "highp",
+        fov: 52, floatAnimations: false, envResolution: 64, reflectorEnabled: false, reflectorResolution: 0 };
     }
+
     // MEDIUM — tablet, laptop, or low-core desktop
     if (isTablet || cores <= 6 || memory <= 4 || prefersReducedMotion) {
-      return { tier: "medium", highQuality: false, dpr: 1.0, antialias: true, precision: "highp", fov: 46, floatAnimations: true };
+      return { tier: "medium", highQuality: false, dpr: 1.0, antialias: true, precision: "highp",
+        fov: 46, floatAnimations: true, envResolution: 256, reflectorEnabled: true, reflectorResolution: 256 };
     }
     // HIGH — desktop with a capable GPU
-    return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp", fov: 42, floatAnimations: true };
+    return { tier: "high", highQuality: true, dpr: [1, 1.25], antialias: true, precision: "highp",
+      fov: 42, floatAnimations: true, envResolution: 256, reflectorEnabled: true, reflectorResolution: 512 };
   }, []);
+
+  // If actual FPS < 48 after the scene loads, PerformanceProbe calls
+  // setAdaptedDpr() once — R3F reacts to the new `dpr` prop automatically.
+  const [adaptedDpr, setAdaptedDpr] = useState<number | null>(null);
+  const effectiveDpr = adaptedDpr ?? profile.dpr;
 
   useEffect(() => {
     if (!onReady) {
@@ -1993,7 +2093,7 @@ export default function ShowroomScene({ progress, pointer, onReady, paused = fal
   return (
     <Canvas
       shadows={profile.highQuality}
-      dpr={profile.dpr}
+      dpr={effectiveDpr}
       gl={{
         antialias: profile.antialias,
         powerPreference: profile.highQuality ? "high-performance" : "default",
@@ -2009,16 +2109,26 @@ export default function ShowroomScene({ progress, pointer, onReady, paused = fal
       <color attach="background" args={["#4a454f"]} />
       <fogExp2 attach="fog" args={["#4a454f", 0.012]} />
       <Lights highQuality={profile.highQuality} progress={progress} />
-      <Environment files="/dikhololo_night_1k.hdr" resolution={profile.highQuality ? 256 : 160} />
-      {profile.tier === "low" ? (
+      <Environment files="/dikhololo_night_1k.hdr" resolution={profile.envResolution} />
+      {!profile.floatAnimations ? (
         <Car highQuality={profile.highQuality} progress={progress} />
       ) : (
         <Float speed={1.1} rotationIntensity={0.06} floatIntensity={0.18}>
           <Car highQuality={profile.highQuality} progress={progress} />
         </Float>
       )}
-      <Showroom highQuality={profile.highQuality} tier={profile.tier} floatAnimations={profile.floatAnimations} />
+      <Showroom
+        highQuality={profile.highQuality}
+        tier={profile.tier}
+        floatAnimations={profile.floatAnimations}
+        reflectorEnabled={profile.reflectorEnabled}
+        reflectorResolution={profile.reflectorResolution}
+      />
       <CameraRig progress={progress} pointer={pointer} />
+      <PerformanceProbe
+        initialDpr={typeof effectiveDpr === "number" ? effectiveDpr : 1.25}
+        onReduce={setAdaptedDpr}
+      />
     </Canvas>
   );
 }
