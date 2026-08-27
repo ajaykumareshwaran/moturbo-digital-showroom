@@ -155,24 +155,24 @@ function DetailingLabNiche({ animate }: { animate: boolean }) {
             <boxGeometry args={[0.38, 0.008, 3.5]} />
             <meshBasicMaterial color="#ffe8a0" toneMapped={false} />
           </mesh>
-          <pointLight
+          {animate && <pointLight
             position={[-0.1, sy - 0.08, 0]}
             intensity={2.6}
             color="#ffd580"
             distance={1.7}
             decay={2}
-          />
+          />}
         </group>
       ))}
       {/* Purple ambient + gold warm fill */}
-      <pointLight
+      {animate && <pointLight
         position={[-0.3, 0, 0]}
         intensity={3.0}
         color="#6e38b2"
         distance={4.2}
         decay={2}
-      />
-      <pointLight position={[0.1, 1.4, 0]} intensity={5.0} color={GOLD} distance={4.8} decay={2} />
+      />}
+      {animate && <pointLight position={[0.1, 1.4, 0]} intensity={5.0} color={GOLD} distance={4.8} decay={2} />}
       {/* Products with subtle float */}
       <group ref={floatRef}>
         {/* Bottom shelf — featured wheel + brake set */}
@@ -384,18 +384,18 @@ function AccessoryWorkroomNiche({ animate }: { animate: boolean }) {
             <boxGeometry args={[0.38, 0.008, 3.5]} />
             <meshBasicMaterial color="#ffe8a0" toneMapped={false} />
           </mesh>
-          <pointLight
+          {animate && <pointLight
             position={[0.1, sy - 0.08, 0]}
             intensity={2.6}
             color="#ffd580"
             distance={1.7}
             decay={2}
-          />
+          />}
         </group>
       ))}
       {/* Purple ambient + gold warm fill */}
-      <pointLight position={[0.3, 0, 0]} intensity={3.0} color="#6e38b2" distance={4.2} decay={2} />
-      <pointLight position={[-0.1, 1.4, 0]} intensity={5.0} color={GOLD} distance={4.8} decay={2} />
+      {animate && <pointLight position={[0.3, 0, 0]} intensity={3.0} color="#6e38b2" distance={4.2} decay={2} />}
+      {animate && <pointLight position={[-0.1, 1.4, 0]} intensity={5.0} color={GOLD} distance={4.8} decay={2} />}
       {/* Products */}
       <group ref={floatRef}>
         {/* Shelf 1 — alloy wheel lying flat */}
@@ -676,14 +676,14 @@ function CenterCinematicWallDisplay({ animate }: { animate: boolean }) {
         <meshBasicMaterial color="#f9f0cf" transparent opacity={0.06} toneMapped={false} />
       </mesh>
 
-      <pointLight position={[0, 0.2, 0.35]} intensity={7.5} color={GOLD} distance={8} decay={2} />
-      <pointLight
+      {animate && <pointLight position={[0, 0.2, 0.35]} intensity={7.5} color={GOLD} distance={8} decay={2} />}
+      {animate && <pointLight
         position={[0, 0.1, 0.34]}
         intensity={3.4}
         color="#6d3ba8"
         distance={7}
         decay={2}
-      />
+      />}
     </group>
   );
 }
@@ -759,21 +759,22 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
         </group>
       ))}
 
-      <pointLight
+      {animate && <pointLight
         position={[side * 0.1, 0.72, 0]}
         intensity={2.8}
         color={GOLD}
         distance={3.6}
         decay={2}
-      />
-      <pointLight
+      />}
+      {animate && <pointLight
         position={[side * 0.12, 0.2, 0]}
         intensity={1.8}
         color="#6d39a8"
         distance={3.2}
         decay={2}
-      />
+      />}
 
+      {animate && (
       <group ref={floatRef}>
         {variant === 0 ? (
           <>
@@ -869,6 +870,7 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
           <meshStandardMaterial color="#111118" roughness={0.3} metalness={0.52} />
         </mesh>
       </group>
+      )}
     </group>
   );
 }
@@ -1080,8 +1082,8 @@ function Showroom({ highQuality, tier, floatAnimations, reflectorEnabled, reflec
         )),
       )}
 
-      {/* accessory display wall (right) */}
-      {Array.from({ length: 12 }).map((_, i) => {
+      {/* accessory display wall (right) — skipped on mobile; saves ~80 draw calls */}
+      {floatAnimations && Array.from({ length: 12 }).map((_, i) => {
         const y = 1.4 + (i % 3) * 1.3;
         const z = 8 + Math.floor(i / 3) * 2.2;
         const toneA = productTones[i % productTones.length]!;
@@ -1864,8 +1866,8 @@ function Showroom({ highQuality, tier, floatAnimations, reflectorEnabled, reflec
           color={GOLD}
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.015}
-          outlineColor="#0f0d14"
+          outlineWidth={highQuality ? 0.015 : 0}
+          outlineColor={highQuality ? "#0f0d14" : GOLD}
         >
           MOTURBO
         </Text>
@@ -1985,16 +1987,16 @@ function PerformanceProbe({ initialDpr, onReduce }: {
     const now = performance.now();
     const dt  = now - last.current;
     last.current = now;
-    if (dt >= 5 && dt <= 200) ms.current.push(dt);
+    if (dt >= 5 && dt <= 500) ms.current.push(dt);
     count.current++;
     if (count.current < 45 || ms.current.length < 16) return;
     fired.current = true;
     const avg = ms.current.reduce((s, v) => s + v, 0) / ms.current.length;
     const fps = 1000 / avg;
-    if (fps < 48) {
+    if (fps < 40) {
       // Prefer gentle pixel-count reductions over drastic drops.
-      const factor = Math.max(0.55, Math.sqrt(fps / 48));
-      const newDpr = Math.max(0.75, Math.round(initialDpr * factor * 20) / 20);
+      const factor = Math.max(0.55, Math.sqrt(fps / 40));
+      const newDpr = Math.max(0.6, Math.round(initialDpr * factor * 20) / 20);
       if (newDpr < initialDpr - 0.09) onReduce(newDpr);
     }
   });

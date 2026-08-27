@@ -51,8 +51,14 @@ function ShopPage() {
     return list;
   }, [q, cat, brand, maxPrice, sort]);
 
-  const recentProducts = recent.map((s) => PRODUCTS.find((p) => p.slug === s)!).filter(Boolean);
-  const compareProducts = compare.map((s) => PRODUCTS.find((p) => p.slug === s)!).filter(Boolean);
+  const recentProducts = useMemo(
+    () => recent.map((s) => PRODUCTS.find((p) => p.slug === s)!).filter(Boolean),
+    [recent],
+  );
+  const compareProducts = useMemo(
+    () => compare.map((s) => PRODUCTS.find((p) => p.slug === s)!).filter(Boolean),
+    [compare],
+  );
 
   return (
     <>

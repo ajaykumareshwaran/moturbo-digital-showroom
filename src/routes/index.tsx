@@ -6,6 +6,7 @@ import { LuxLink, Magnetic, Reveal, SectionHeading, TiltCard } from "@/component
 import { ProductCard } from "@/components/ProductCard";
 import { ServiceCard } from "@/components/ServiceCard";
 import { PRODUCTS, SERVICES, currency } from "@/data/catalog";
+import { SocialSection } from "@/components/SocialSection";
 
 // Lazy-load the heavy 3D showroom component (1.2MB bundle)
 const ShowroomStage = lazy(() => import("@/components/three/ShowroomStage").then(m => ({ default: m.ShowroomStage })));
@@ -25,6 +26,12 @@ export const Route = createFileRoute("/")({
         content:
           "An immersive luxury automotive studio. Detailing, protection and craft, rendered in real time.",
       },
+    ],
+    links: [
+      // Preload 3D assets only on the homepage — other pages don't need them.
+      { rel: "preload", href: "/showroom-bg.jpg", as: "image" },
+      { rel: "preload", href: "/models/car2.glb", as: "fetch", crossOrigin: "anonymous" },
+      { rel: "preload", href: "/dikhololo_night_1k.hdr", as: "fetch", crossOrigin: "anonymous" },
     ],
   }),
   component: Index,
@@ -69,7 +76,7 @@ const CHAPTERS = [
   {
     eyebrow: "Chapter 08 — Reception",
     title: "Reserve your slot",
-    body: "Three branches, executive collection and a live progress feed for every vehicle in the studio.",
+    body: "One branch, executive collection and a live progress feed for every vehicle in the studio.",
   },
 ];
 
@@ -169,7 +176,7 @@ function Index() {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-10 flex flex-col items-center gap-2 text-muted-foreground"
+            className="absolute bottom-10 hidden sm:flex flex-col items-center gap-2 text-muted-foreground"
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2.4, repeat: Infinity }}
           >
@@ -236,7 +243,7 @@ function Index() {
             <Reveal className="glass-strong lux-border relative z-10 w-full max-w-md rounded-3xl p-8 order-1 sm:order-none" y={40}>
               <div className="eyebrow">{c.eyebrow}</div>
               <h2 className="mt-4 text-3xl leading-tight font-semibold">{c.title}</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+              <p className="mt-4 text-sm font-semibold leading-relaxed text-foreground">{c.body}</p>
               <div className="hairline mt-6 w-24" />
               {i === CHAPTERS.length - 1 && (
                 <div className="mt-6">
@@ -391,6 +398,9 @@ function Index() {
         </div>
       </section>
 
+      {/* ---------- Social — Stay in the Loop ---------- */}
+      <SocialSection />
+
       {/* ---------- Booking CTA ---------- */}
       <section className="relative mx-auto max-w-7xl px-6 pb-32">
         <Reveal>
@@ -399,7 +409,7 @@ function Index() {
             <div className="relative">
               <div className="eyebrow">Reservations</div>
               <h2 className="mx-auto mt-5 max-w-2xl text-4xl leading-tight font-semibold text-balance sm:text-5xl">
-                Reserve a bay in the <span className="text-gold">flagship studio</span>
+                Reserve an area in our <span className="text-gold">Moturbo Showroom</span>
               </h2>
               <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">
                 Choose your vehicle, service and package. Executive collection available across

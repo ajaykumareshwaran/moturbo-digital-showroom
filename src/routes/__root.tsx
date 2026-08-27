@@ -17,6 +17,8 @@ import { MiniCart } from "@/components/MiniCart";
 import { Preloader } from "@/components/Preloader";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Toaster } from "@/components/ui/sonner";
+import { ClientOnly } from "@/components/ClientOnly";
+import { WhatsAppFAB } from "@/components/SocialFloating";
 
 function NotFoundComponent() {
   return (
@@ -102,15 +104,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap",
+        // weight 300 is never used in this design — dropping it saves 2 font file downloads.
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
       },
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "preload", href: "/showroom-bg.jpg", as: "image" },
-      { rel: "preload", href: "/models/car2.glb", as: "fetch", crossOrigin: "anonymous" },
-      { rel: "preload", href: "/dikhololo_night_1k.hdr", as: "fetch", crossOrigin: "anonymous" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
@@ -151,21 +151,25 @@ function RootComponent() {
     const verySlowNetwork = /(^|-)2g$/.test(connection?.effectiveType ?? "");
     const lowMemory = (nav.deviceMemory ?? 8) <= 4;
 
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
     if (saveData || verySlowNetwork) {
       return;
     }
 
     const warm = () => {
-      // Warm route-critical 3D code and binary assets so the showroom appears faster.
-      void import("@/components/three/ShowroomStage");
-      void import("@/components/three/ShowroomScene");
+      // Skip heavy 3D warm-up on mobile — saves 7+ MB of cellular data per visit.
+      if (!isMobile) {
+        void import("@/components/three/ShowroomStage");
+        void import("@/components/three/ShowroomScene");
 
-      const heroImg = new Image();
-      heroImg.src = "/showroom-bg.jpg";
+        const heroImg = new Image();
+        heroImg.src = "/showroom-bg.jpg";
 
-      if (!lowMemory) {
-        void fetch("/models/car2.glb", { cache: "force-cache" }).catch(() => undefined);
-        void fetch("/dikhololo_night_1k.hdr", { cache: "force-cache" }).catch(() => undefined);
+        if (!lowMemory) {
+          void fetch("/models/car2.glb", { cache: "force-cache" }).catch(() => undefined);
+          void fetch("/dikhololo_night_1k.hdr", { cache: "force-cache" }).catch(() => undefined);
+        }
       }
     };
 
@@ -198,6 +202,10 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
+        {/* Floating social elements — mounted client-only to avoid SSR mismatch */}
+        <ClientOnly>
+          <WhatsAppFAB />
+        </ClientOnly>
         <Toaster position="bottom-right" offset={{ bottom: 170, right: 45 }} mobileOffset={{ bottom: 150, right: 16 }} />
       </StoreProvider>
     </QueryClientProvider>

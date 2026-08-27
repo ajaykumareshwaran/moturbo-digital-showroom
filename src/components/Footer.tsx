@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, Youtube, Facebook, Phone, Mail, MessageCircle, MapPin } from "lucide-react";
+import { Instagram, Youtube, Facebook } from "lucide-react";
+import { Phone, Mail, MessageCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SERVICES } from "@/data/catalog";
 import { LuxButton, Reveal } from "@/components/lux";
+import { SOCIAL_LINKS } from "@/components/SocialFloating";
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -58,10 +60,17 @@ export function Footer() {
             </form>
 
             <div className="mt-8 flex gap-2">
-              {[Instagram, Youtube, Facebook].map((Icon, i) => (
+              {[
+                { Icon: Instagram, href: SOCIAL_LINKS.instagram, label: "Instagram" },
+                { Icon: Youtube, href: "#", label: "YouTube" },
+                { Icon: Facebook, href: SOCIAL_LINKS.facebook, label: "Facebook" },
+              ].map(({ Icon, href, label }) => (
                 <a
-                  key={i}
-                  href="#"
+                  key={label}
+                  href={href}
+                  target={href !== "#" ? "_blank" : undefined}
+                  rel={href !== "#" ? "noopener noreferrer" : undefined}
+                  aria-label={`MOTURBO on ${label}`}
                   className="glass grid size-10 place-items-center rounded-full text-muted-foreground transition-all hover:-translate-y-1 hover:text-gold-soft"
                 >
                   <Icon className="size-4" />
@@ -118,7 +127,15 @@ export function Footer() {
                 <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> moturboweb@gmail.com
               </li>
               <li className="flex gap-2.5">
-                <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold/70" /> WhatsApp executive
+                <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold/70" />
+                <a
+                  href={SOCIAL_LINKS.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-gold-soft"
+                >
+                  WhatsApp executive
+                </a>
               </li>
             </ul>
             <div className="mt-6 text-sm text-muted-foreground">
