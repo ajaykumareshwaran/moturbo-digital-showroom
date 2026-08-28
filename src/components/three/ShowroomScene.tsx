@@ -774,8 +774,7 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
         decay={2}
       />}
 
-      {animate && (
-      <group ref={floatRef}>
+      <group ref={animate ? floatRef : undefined}>
         {variant === 0 ? (
           <>
             <group position={[side * 0.11, -0.88, -0.44]} rotation={[Math.PI / 2, 0, 0]}>
@@ -870,7 +869,6 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
           <meshStandardMaterial color="#111118" roughness={0.3} metalness={0.52} />
         </mesh>
       </group>
-      )}
     </group>
   );
 }

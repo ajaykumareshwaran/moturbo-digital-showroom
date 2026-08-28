@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ServiceCard } from "@/components/ServiceCard";
 import { PRODUCTS, SERVICES, currency } from "@/data/catalog";
 import { SocialSection } from "@/components/SocialSection";
+import { ShowroomLoadingOverlay } from "@/components/three/ShowroomStage";
 
 // Lazy-load the heavy 3D showroom component (1.2MB bundle)
 const ShowroomStage = lazy(() => import("@/components/three/ShowroomStage").then(m => ({ default: m.ShowroomStage })));
@@ -83,25 +84,47 @@ const CHAPTERS = [
 function Index() {
   const stageRef = useRef<HTMLElement | null>(null);
   const featured = PRODUCTS.slice(0, 6);
+  const [shouldLoadShowroom, setShouldLoadShowroom] = useState(false);
+
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node || typeof window === "undefined") {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          setShouldLoadShowroom(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "250px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
-      {/* ---------- Cinematic 3D showroom (lazy-loaded) ---------- */}
-      <Suspense
-        fallback={
-          <div
-            className="pointer-events-none fixed inset-0 -z-10 bg-[#4a454f]"
-            style={{
-              backgroundImage:
-                "linear-gradient(to bottom, rgba(74,69,79,0.82), rgba(74,69,79,0.98)), url('/showroom-bg.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-        }
-      >
-        <ShowroomStage sectionRef={stageRef} />
-      </Suspense>
+      {/* ---------- Cinematic 3D showroom (lazy-loaded only when near the viewport) ---------- */}
+      {shouldLoadShowroom ? (
+        <Suspense
+          fallback={
+            <div className="pointer-events-none fixed inset-0 z-[30] overflow-hidden">
+              <ShowroomLoadingOverlay />
+            </div>
+          }
+        >
+          <ShowroomStage sectionRef={stageRef} />
+        </Suspense>
+      ) : (
+        <div className="pointer-events-none fixed inset-0 z-[30] overflow-hidden">
+          <ShowroomLoadingOverlay />
+        </div>
+      )}
 
       <section ref={stageRef} className="relative">
         {/* Hero */}
@@ -114,11 +137,15 @@ function Index() {
             <div className="font-display text-[0.72rem] font-bold tracking-[0.34em] text-gold uppercase sm:text-[0.78rem]">
               EST. 2026 · LUXURY AUTOMOTIVE STUDIO
             </div>
-            <h1 className="mt-6 font-display text-[13vw] leading-[0.85] font-black text-chrome sm:text-[8rem]">
+            <h1 className="mt-6 font-display text-[13vw] leading-[0.85] font-black tracking-[-0.05em] text-chrome drop-shadow-[0_12px_30px_rgba(255,255,255,0.18)] sm:text-[8rem]">
               MOTURBO
             </h1>
-            <div className="relative mx-auto mt-6 w-full max-w-3xl rounded-3xl border border-[#2a2633] bg-[#14131b] px-4 py-4 shadow-[0_20px_50px_-30px_oklch(0.12_0.02_300/90%)] sm:px-6">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              className="relative mx-auto mt-6 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-[#e8c37a]/80 bg-[#101115] px-4 py-4 shadow-[0_0_0_1px_rgba(232,195,122,0.35),0_0_30px_rgba(232,195,122,0.18),0_25px_60px_rgba(0,0,0,0.55)] sm:px-6"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.10),transparent_55%)]" />
+              <div className="absolute inset-0 opacity-100" style={{ boxShadow: "inset 0 0 0 1px rgba(232,195,122,0.4), inset 0 0 18px rgba(232,195,122,0.12)" }} />
+              <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   {
                     icon: Shield,
@@ -145,15 +172,15 @@ function Index() {
                   return (
                     <div
                       key={item.title}
-                      className={`rounded-2xl px-4 py-3 text-left ${
-                        i > 0 ? "border-t border-white/8 sm:border-t-0 lg:border-l" : ""
-                      } ${i > 0 ? "lg:border-white/8" : ""}`}
+                      className={`rounded-2xl border border-white/8 bg-[#16181d] px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-[#e8c37a]/60 hover:bg-[#1a1d23] ${
+                        i > 0 ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""
+                      } ${i > 0 ? "lg:border-white/10" : ""}`}
                     >
-                      <Icon className="size-5 text-gold" />
-                      <div className="mt-3 font-display text-[0.58rem] font-semibold tracking-[0.18em] text-silver uppercase">
+                      <Icon className="size-5 text-gold drop-shadow-[0_0_12px_rgba(232,195,122,0.8)]" />
+                      <div className="mt-3 font-display text-[0.58rem] font-black tracking-[0.18em] text-silver uppercase">
                         {item.title}
                       </div>
-                      <p className="mt-2 text-[0.72rem] leading-relaxed text-muted-foreground">
+                      <p className="mt-2 text-[0.72rem] font-medium leading-relaxed text-white/80">
                         {item.copy}
                       </p>
                     </div>
@@ -170,6 +197,11 @@ function Index() {
               <Magnetic>
                 <LuxLink to="/shop">
                   EXPLORE SHOP <ArrowRight className="size-3.5" />
+                </LuxLink>
+              </Magnetic>
+              <Magnetic>
+                <LuxLink to="/locations">
+                  GET DIRECTIONS <ArrowRight className="size-3.5" />
                 </LuxLink>
               </Magnetic>
             </div>
@@ -419,12 +451,16 @@ function Index() {
                 <Magnetic>
                   <LuxLink to="/book">Book Appointment</LuxLink>
                 </Magnetic>
-                <Link
-                  to="/contact"
-                  className="font-display text-[0.68rem] tracking-[0.24em] text-muted-foreground uppercase underline-offset-8 transition-colors hover:text-gold-soft hover:underline"
-                >
-                  Talk to executive
-                </Link>
+                <Magnetic>
+                  <a
+                    href="tel:+918123909685"
+                    className="sheen inline-flex items-center justify-center gap-2 rounded-full border border-[#f0d28b] bg-transparent px-7 py-3.5 font-display text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#f6ecd2] shadow-[0_0_18px_rgba(232,195,122,0.18)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_0_34px_rgba(232,195,122,0.28)]"
+                    style={{ backgroundImage: "var(--gradient-royal)" }}
+                    aria-label="Call MOTURBO executive"
+                  >
+                    Talk to executive
+                  </a>
+                </Magnetic>
               </div>
             </div>
           </div>

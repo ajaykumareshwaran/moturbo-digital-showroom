@@ -18,6 +18,7 @@ export function Preloader() {
 
     let pageLoaded = document.readyState === "complete";
     let finished = false;
+    const startedAt = Date.now();
 
     const onPageLoad = () => { pageLoaded = true; };
     if (!pageLoaded) window.addEventListener("load", onPageLoad, { once: true });
@@ -28,7 +29,6 @@ export function Preloader() {
       v = Math.min(100, v + step);
       const p = Math.round(v);
 
-      // Direct DOM mutations - no setState, no re-renders during loading.
       if (barRef.current)      barRef.current.style.width          = `${p}%`;
       if (labelRef.current)    labelRef.current.textContent        = String(p).padStart(3, "0");
       if (shutter0Ref.current) shutter0Ref.current.style.transform = `translateY(${-p * 1.1}%)`;
@@ -37,7 +37,9 @@ export function Preloader() {
       if (v >= 100 && !finished) {
         finished = true;
         clearInterval(id);
-        window.setTimeout(() => setDone(true), 500);
+        const elapsed = Date.now() - startedAt;
+        const remaining = Math.max(0, 2000 - elapsed);
+        window.setTimeout(() => setDone(true), remaining);
       }
     }, 22);
 

@@ -15,6 +15,7 @@ const LINKS = [
   { to: "/about", label: "Studio" },
   { to: "/blog", label: "Journal" },
   { to: "/contact", label: "Contact" },
+  { to: "/locations", label: "Location" },
 ] as const;
 
 export function Navbar() {
@@ -55,15 +56,15 @@ export function Navbar() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
-            "glass-strong pointer-events-auto flex w-full max-w-6xl items-center gap-3 rounded-full py-2.5 pr-2.5 pl-5 transition-all duration-700",
+            "glass-strong pointer-events-auto flex w-full max-w-[78rem] items-center gap-3 rounded-full py-3 pr-2.5 pl-4 transition-all duration-700 sm:py-2.5 sm:pl-5",
             scrolled ? "shadow-[var(--shadow-lift)] backdrop-blur-3xl" : "",
           )}
         >
           <Link to="/" className="mr-auto flex items-center gap-2.5">
-            <div className="size-10">
+            <div className="size-8 sm:size-10">
               <MoturboLogo />
             </div>
-            <span className="font-display text-sm font-extrabold tracking-[0.34em] text-chrome">
+            <span className="font-display text-[0.7rem] font-extrabold tracking-[0.26em] text-chrome sm:text-sm sm:tracking-[0.34em]">
               MOTURBO
             </span>
           </Link>
@@ -105,9 +106,9 @@ export function Navbar() {
                 </span>
               )}
             </button>
-            <div className="hidden sm:block">
+            <div className="block">
               <Magnetic>
-                <LuxLink to="/book" className="px-5 py-2.5 text-[0.62rem]">
+                <LuxLink to="/book" className="px-3.5 py-2 text-[0.52rem] whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[0.58rem]">
                   Book Now
                 </LuxLink>
               </Magnetic>
