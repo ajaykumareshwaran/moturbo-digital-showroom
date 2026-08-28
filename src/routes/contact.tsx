@@ -90,7 +90,7 @@ function ContactPage() {
           <div className="space-y-4">
             {[
               [Phone, "Reception", "+91 8147702668"],
-              [Mail, "Email", "moturboweb@gmail.com"],
+              [Mail, "Email", "moturbo@gmail.com"],
               [Clock, "Hours", "Mon–Sun · 08:00 — 20:00"],
             ].map(([Icon, label, value]) => {
               const I = Icon as typeof Phone;

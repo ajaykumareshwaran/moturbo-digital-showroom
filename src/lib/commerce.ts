@@ -194,7 +194,7 @@ async function sendResendEmail(args: {
 }) {
   const resendApiKey = readEnv("RESEND_API_KEY");
   const from = readEnv("RESEND_FROM_EMAIL");
-  const fromName = process.env["MAIL_FROM_NAME"] || "MOTURBO Executive Desk";
+  const fromName = process.env["MAIL_FROM_NAME"] || "MOTURBO Executive";
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",

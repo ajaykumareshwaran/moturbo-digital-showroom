@@ -124,7 +124,7 @@ export function Footer() {
                 <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +91 8147702688
               </li>
               <li className="flex gap-2.5">
-                <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> moturboweb@gmail.com
+                <Mail className="mt-0.5 size-4 shrink-0 text-gold/70" /> moturbo@gmail.com
               </li>
               <li className="flex gap-2.5">
                 <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold/70" />
