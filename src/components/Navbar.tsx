@@ -83,10 +83,10 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
+          <div className="ml-auto flex max-w-full items-center gap-0.5 sm:gap-1.5 lg:ml-0">
             <Link
               to="/wishlist"
-              className="relative grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:text-gold-soft"
+              className="relative grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:text-gold-soft sm:size-9"
               aria-label="Wishlist"
             >
               <Heart className="size-4" />
@@ -96,7 +96,7 @@ export function Navbar() {
             </Link>
             <button
               onClick={() => setMiniCartOpen(true)}
-              className="relative grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:text-gold-soft"
+              className="relative grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:text-gold-soft sm:size-9"
               aria-label="Cart"
             >
               <ShoppingBag className="size-4" />
@@ -106,16 +106,16 @@ export function Navbar() {
                 </span>
               )}
             </button>
-            <div className="block">
+            <div className="block shrink-0">
               <Magnetic>
-                <LuxLink to="/book" className="px-3.5 py-2 text-[0.52rem] whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[0.58rem]">
+                <LuxLink to="/book" className="px-2.5 py-2 text-[0.48rem] whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[0.58rem]">
                   Book Now
                 </LuxLink>
               </Magnetic>
             </div>
             <button
               onClick={() => setOpen((o) => !o)}
-              className="grid size-9 place-items-center rounded-full text-foreground lg:hidden"
+              className="-ml-0.5 grid size-8 shrink-0 place-items-center rounded-full text-foreground lg:hidden sm:size-9 sm:ml-0"
               aria-label="Menu"
             >
               {open ? <X className="size-4" /> : <Menu className="size-4" />}

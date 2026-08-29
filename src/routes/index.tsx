@@ -144,11 +144,11 @@ function Index() {
               MOTURBO
             </h1>
             <div
-              className="relative mx-auto mt-4 w-[94%] max-w-3xl overflow-hidden rounded-[1.5rem] border border-[#e8c37a]/80 bg-[#101115] px-3 py-3 shadow-[0_0_0_1px_rgba(232,195,122,0.35),0_0_30px_rgba(232,195,122,0.18),0_25px_60px_rgba(0,0,0,0.55)] sm:mt-6 sm:w-full sm:rounded-[2rem] sm:px-6 sm:py-4"
+              className="relative mx-auto mt-24 w-[94%] max-w-3xl overflow-hidden rounded-[1.5rem] border border-[#e8c37a]/80 bg-[#101115] px-3 py-3 shadow-[0_0_0_1px_rgba(232,195,122,0.35),0_0_30px_rgba(232,195,122,0.18),0_25px_60px_rgba(0,0,0,0.55)] sm:mt-6 sm:w-full sm:rounded-[2rem] sm:px-6 sm:py-4"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.10),transparent_55%)]" />
               <div className="absolute inset-0 opacity-100" style={{ boxShadow: "inset 0 0 0 1px rgba(232,195,122,0.4), inset 0 0 18px rgba(232,195,122,0.12)" }} />
-              <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="relative mt-1 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   {
                     icon: Shield,
@@ -175,13 +175,15 @@ function Index() {
                   return (
                     <div
                       key={item.title}
-                      className={`rounded-2xl border border-white/8 bg-[#16181d] px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-[#e8c37a]/60 hover:bg-[#1a1d23] ${
+                      className={`flex min-h-[7.2rem] flex-col justify-start rounded-2xl border border-white/8 bg-[#16181d] px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-[#e8c37a]/60 hover:bg-[#1a1d23] ${
                         i > 0 ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""
                       } ${i > 0 ? "lg:border-white/10" : ""}`}
                     >
-                      <Icon className="size-5 text-gold drop-shadow-[0_0_12px_rgba(232,195,122,0.8)]" />
-                      <div className="mt-3 font-display text-[0.58rem] font-black tracking-[0.18em] text-silver uppercase">
-                        {item.title}
+                      <div className="flex items-center gap-2">
+                        <Icon className="size-5 shrink-0 text-gold drop-shadow-[0_0_12px_rgba(232,195,122,0.8)]" />
+                        <div className="font-display text-[0.58rem] font-black tracking-[0.18em] text-silver uppercase">
+                          {item.title}
+                        </div>
                       </div>
                       <p className="mt-2 text-[0.72rem] font-medium leading-relaxed text-white/80">
                         {item.copy}
