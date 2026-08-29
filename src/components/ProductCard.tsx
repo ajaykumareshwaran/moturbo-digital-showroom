@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useStore } from "@/context/StoreContext";
 import { ProductOrb } from "@/components/ProductOrb";
 import { TiltCard } from "@/components/lux";
-import { currency, optimizeImageSrcSet, type Product } from "@/data/catalog";
+import { currency, type Product } from "@/data/catalog";
 import { cn } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -15,25 +15,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <TiltCard className="glass lux-border h-full overflow-hidden rounded-3xl">
       <div className="relative h-56 overflow-hidden rounded-t-3xl">
-        {product.image ? (
-          <img
-            src={product.image}
-            srcSet={optimizeImageSrcSet(product.image)}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              e.currentTarget.parentElement?.querySelector("div[data-fallback]")?.classList.remove("hidden");
-            }}
-          />
-        ) : null}
-        <div data-fallback className={cn("absolute inset-0 hidden", !product.image && "block")}>
-          <ProductOrb hue={product.hue} />
-        </div>
-        {!product.image && <ProductOrb hue={product.hue} />}
+        <ProductOrb hue={product.hue} />
         {product.badge && (
           <span className="absolute top-4 left-4 rounded-full bg-[image:var(--gradient-gold)] px-3 py-1 font-display text-[0.55rem] font-bold tracking-[0.2em] text-noir uppercase">
             {product.badge}

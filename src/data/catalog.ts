@@ -11,50 +11,8 @@ export type Product = {
   rating: number;
   reviews: number;
   badge?: string;
-  image?: string;
   specs: { label: string; value: string }[];
   hue: number;
-};
-
-export function optimizeImageUrl(url: string, width: number) {
-  if (!url) return url;
-
-  const normalized = url
-    .replace(/([?&])w=\d+/g, "")
-    .replace(/([?&])q=\d+/g, "")
-    .replace(/([?&])fm=[^&]+/g, "")
-    .replace(/([?&])fit=crop/g, "")
-    .replace(/([?&])auto=format/g, "")
-    .replace(/\?&/, "?")
-    .replace(/&&/g, "&");
-
-  const separator = normalized.includes("?") ? "&" : "?";
-  return `${normalized}${separator}auto=format&fit=crop&w=${width}&q=80&fm=jpg`;
-}
-
-export function optimizeImageSrcSet(url: string) {
-  return [400, 800, 1200]
-    .map((width) => `${optimizeImageUrl(url, width)} ${width}w`)
-    .join(", ");
-}
-
-const PRODUCT_IMAGES: Record<string, string> = {
-  "noir-elixir-perfume": "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1000&q=80",
-  "workroom-cleaning-kit": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&w=1000&q=80",
-  "ceramic-9h-coating": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1000&q=80",
-  "turbo-pressure-washer": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1000&q=80",
-  "gold-foam-cannon": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=80",
-  "silk-microfiber-towel": "https://images.unsplash.com/photo-1585759296443-c5f1f3c0c2bb?auto=format&fit=crop&w=1000&q=80",
-  "cyclone-vacuum": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=80",
-  "interior-cleaner-pro": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1000&q=80",
-  "dashboard-polish": "https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=1000&q=80",
-  "wheel-cleaner-acid-free": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1000&q=80",
-  "orbital-polisher-15": "https://images.unsplash.com/photo-1581141159553-8fca7891d7b9?auto=format&fit=crop&w=1000&q=80",
-  "air-freshener-crystal": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=1000&q=80",
-  "ppf-care-accessory-kit": "https://images.unsplash.com/photo-1528742795480-7f2fc7b2c6f1?auto=format&fit=crop&w=1000&q=80",
-  "graphene-sealant": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1000&q=80",
-  "leather-balm": "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=1000&q=80",
-  "glass-coat-rain": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1000&q=80",
 };
 
 const mk = (
@@ -79,7 +37,6 @@ const mk = (
   brand,
   rating,
   reviews,
-  image: PRODUCT_IMAGES[slug] ?? "",
   hue,
   specs: [
     { label: "Origin", value: "MOTURBO Workroom" },
@@ -89,7 +46,7 @@ const mk = (
   ...extra,
 });
 
-const PRODUCT_LIST: Product[] = [
+export const PRODUCTS: Product[] = [
   mk(
     "noir-elixir-perfume",
     "Noir Élixir Car Perfume",
@@ -280,8 +237,6 @@ const PRODUCT_LIST: Product[] = [
   ),
 ];
 
-export const PRODUCTS: Product[] = Array.from(new Map(PRODUCT_LIST.map((product) => [product.slug, product])).values());
-
 export const CATEGORIES = ["All", ...Array.from(new Set(PRODUCTS.map((p) => p.category)))];
 export const BRANDS = Array.from(new Set(PRODUCTS.map((p) => p.brand)));
 
@@ -423,12 +378,7 @@ export const PACKAGES = [
 ];
 
 export const BRANCHES = [
-  {
-    id: "downtown",
-    name: "MOTURBO Bengaluru Showroom",
-    address:
-      "Site No.02 Gottigere Village, 80 Feet Road, Uttarahalli Hobli, Bangalore South Taluk, Bangalore - 560083",
-  },
+  { id: "downtown", name: "MOTURBO Bengaluru Showroom", address: "Level 1, MG Road, Bengaluru" },
   { id: "north", name: "MOTURBO Upcoming Studio", address: "Unit 2, Coming Soon" },
   { id: "airport", name: "MOTURBO Upcoming Bay", address: "Unit 3, Coming Soon" },
 ];

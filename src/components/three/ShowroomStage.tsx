@@ -10,36 +10,6 @@ const showroomFallbackStyle = {
   backgroundPosition: "center",
 } as const;
 
-export function ShowroomLoadingOverlay() {
-  return (
-    <div className="absolute inset-0 bg-[#16141b]" style={showroomFallbackStyle}>
-      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_50%,transparent_30%,oklch(0.08_0.01_300/80%))]" />
-      <div className="absolute left-1/2 top-1/2 flex w-[84vw] max-w-xl -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center">
-        <img
-          src="/moturbo_lg.png"
-          alt="MOTURBO"
-          className="h-20 w-20 object-contain sm:h-24 sm:w-24"
-          style={{ filter: "drop-shadow(0 0 18px rgba(232,195,122,0.35))" }}
-        />
-        <div className="mt-3 font-display text-[0.64rem] tracking-[0.38em] text-[#e8c37a] uppercase">
-          Preparing Showroom
-        </div>
-        <div className="mt-3 flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-[#e8c37a] animate-pulse" style={{ animationDelay: "0ms" }} />
-          <span className="size-1.5 rounded-full bg-[#e8c37a] animate-pulse" style={{ animationDelay: "180ms" }} />
-          <span className="size-1.5 rounded-full bg-[#e8c37a] animate-pulse" style={{ animationDelay: "360ms" }} />
-        </div>
-        <div className="mt-4 h-[2px] w-44 overflow-hidden rounded-full bg-[#e8c37a2e]">
-          <div
-            className="h-full w-1/2 animate-pulse rounded-full bg-[#e8c37a]"
-            style={{ boxShadow: "0 0 16px rgba(232,195,122,0.65)" }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /**
  * Fixed full-screen showroom canvas. Scroll progress across the whole
  * cinematic section drives the Three.js camera, not the DOM.
@@ -51,32 +21,11 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
   const purpleLayerRef = useRef<HTMLDivElement>(null);
   const [sceneReady, setSceneReady] = useState(false);
   const [framePaused, setFramePaused] = useState(false);
-  const [minDelayPassed, setMinDelayPassed] = useState(false);
-  const [use3DScene, setUse3DScene] = useState(false);
   // Tracks the pending setTimeout that schedules the pause so we can cancel it
   // if the user scrolls back before the fade-out timer fires.
   const pausePendingRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setMinDelayPassed(true), 500);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isSmallViewport = window.matchMedia("(max-width: 768px)").matches;
-    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    setUse3DScene(!(prefersReducedMotion || isSmallViewport || isCoarsePointer));
-  }, []);
-
-  useEffect(() => {
-    if (!use3DScene) {
-      setSceneReady(true);
-      setFramePaused(true);
-      setMinDelayPassed(true);
-      return;
-    }
-
     const allowPointerParallax = !window.matchMedia("(pointer: coarse)").matches;
     let scrollRaf = 0;
     let moveRaf = 0;
@@ -122,15 +71,7 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       const fadeStart = 0.82;
       const fadeEnd = 0.92;
       const t = Math.min(1, Math.max(0, (progress.current - fadeStart) / (fadeEnd - fadeStart)));
-      const sceneOpacity = Math.max(0, 1 - t);
-      const purpleOpacity = Math.min(1, t);
-      setLayerOpacity(sceneOpacity, purpleOpacity);
-
-      if (progress.current >= 0.94) {
-        setFramePaused(true);
-      } else if (progress.current < 0.88) {
-        setFramePaused(false);
-      }
+      setLayerOpacity(1 - t, t);
     };
 
     const onScroll = () => {
@@ -142,7 +83,6 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
     };
 
     const onMove = (e: PointerEvent) => {
-      if (progress.current >= 0.9) return;
       nextPointer = {
         x: (e.clientX / window.innerWidth - 0.5) * 2,
         y: (e.clientY / window.innerHeight - 0.5) * 2,
@@ -183,24 +123,7 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       window.removeEventListener("load", onLoad);
       window.removeEventListener("pageshow", onLoad);
     };
-  }, [sectionRef, use3DScene]);
-
-  if (!use3DScene) {
-    return (
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(to bottom, rgba(12,9,16,0.82), rgba(18,15,23,0.98)), url('/showroom-bg.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_50%,transparent_30%,oklch(0.08_0.01_300/80%))]" />
-      </div>
-    );
-  }
+  }, [sectionRef]);
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10">
@@ -225,14 +148,14 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
       </div>
 
       <div
-        className={`absolute inset-0 transition-opacity duration-500 ${sceneReady && minDelayPassed ? "opacity-0" : "opacity-100"}`}
-        style={{ transitionDelay: sceneReady && minDelayPassed ? "1200ms" : "0ms" }}
+        className={`absolute inset-0 transition-opacity duration-500 ${sceneReady ? "opacity-0" : "opacity-100"}`}
+        style={{ transitionDelay: sceneReady ? "1200ms" : "0ms" }}
       >
         <div
           className="absolute inset-x-0 top-0 h-1/2 border-b border-[#e8c37a33]"
           style={{
             background: "linear-gradient(180deg, rgba(18,15,22,0.98), rgba(31,27,37,0.96))",
-            transform: sceneReady && minDelayPassed ? "translateY(-110%)" : "translateY(0)",
+            transform: sceneReady ? "translateY(-110%)" : "translateY(0)",
             transition: "transform 1600ms cubic-bezier(0.19, 1, 0.22, 1)",
           }}
         />
@@ -240,23 +163,26 @@ export function ShowroomStage({ sectionRef }: { sectionRef: React.RefObject<HTML
           className="absolute inset-x-0 bottom-0 h-1/2 border-t border-[#e8c37a33]"
           style={{
             background: "linear-gradient(0deg, rgba(18,15,22,0.98), rgba(31,27,37,0.96))",
-            transform: sceneReady && minDelayPassed ? "translateY(110%)" : "translateY(0)",
+            transform: sceneReady ? "translateY(110%)" : "translateY(0)",
             transition: "transform 1600ms cubic-bezier(0.19, 1, 0.22, 1)",
           }}
         />
         <div
           className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#e8c37a66]"
           style={{
-            opacity: sceneReady && minDelayPassed ? 0 : 1,
+            opacity: sceneReady ? 0 : 1,
             boxShadow: "0 0 24px rgba(232,195,122,0.65)",
             transition: "opacity 350ms ease",
           }}
         />
 
         <div
-          className="absolute left-1/2 top-1/2 flex w-[84vw] max-w-xl -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center"
+          className="absolute left-1/2 top-1/2 flex w-[84vw] max-w-xl -translate-x-1/2 -translate-y-1/2 flex-col items-center"
           style={{
-            opacity: sceneReady && minDelayPassed ? 0 : 1,
+            opacity: sceneReady ? 0 : 1,
+            transform: sceneReady
+              ? "translate(-50%, calc(-50% + 8px))"
+              : "translate(-50%, -50%)",
             transition: "opacity 400ms ease, transform 550ms ease",
           }}
         >

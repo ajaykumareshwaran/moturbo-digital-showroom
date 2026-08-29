@@ -118,8 +118,7 @@ export function Footer() {
             <div className="eyebrow">Studio</div>
             <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
               <li className="flex gap-2.5">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-gold/70" />
-                Site No.02 Gottigere Village, 80 Feet Road, Uttarahalli Hobli, Bangalore South Taluk, Bangalore - 560083
+                <MapPin className="mt-0.5 size-4 shrink-0 text-gold/70" /> MG Road, Bengaluru
               </li>
               <li className="flex gap-2.5">
                 <Phone className="mt-0.5 size-4 shrink-0 text-gold/70" /> +91 8147702688

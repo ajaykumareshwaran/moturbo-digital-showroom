@@ -3,7 +3,6 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useLocation,
   useRouter,
   HeadContent,
   Scripts,
@@ -137,10 +136,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const location = useLocation();
 
   useEffect(() => {
-    if (typeof window === "undefined" || location.pathname !== "/") {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -160,18 +158,17 @@ function RootComponent() {
     }
 
     const warm = () => {
-      // Only warm the showroom on the homepage and on capable devices.
+      // Skip heavy 3D warm-up on mobile — saves 7+ MB of cellular data per visit.
       if (!isMobile) {
-        window.setTimeout(() => {
-          void import("@/components/three/ShowroomStage");
-          void import("@/components/three/ShowroomScene");
-        }, 1800);
+        void import("@/components/three/ShowroomStage");
+        void import("@/components/three/ShowroomScene");
+
+        const heroImg = new Image();
+        heroImg.src = "/showroom-bg.jpg";
 
         if (!lowMemory) {
-          window.setTimeout(() => {
-            void fetch("/models/car2.glb", { cache: "force-cache" }).catch(() => undefined);
-            void fetch("/dikhololo_night_1k.hdr", { cache: "force-cache" }).catch(() => undefined);
-          }, 2200);
+          void fetch("/models/car2.glb", { cache: "force-cache" }).catch(() => undefined);
+          void fetch("/dikhololo_night_1k.hdr", { cache: "force-cache" }).catch(() => undefined);
         }
       }
     };
@@ -191,7 +188,7 @@ function RootComponent() {
 
     const timeoutId = window.setTimeout(warm, 350);
     return () => window.clearTimeout(timeoutId);
-  }, [location.pathname]);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

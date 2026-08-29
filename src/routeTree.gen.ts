@@ -17,7 +17,6 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as GalleryRouteImport } from './routes/gallery'
-import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as OrderActionRouteImport } from './routes/order-action'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TrackRouteImport } from './routes/track'
@@ -65,11 +64,6 @@ const GalleryRoute = GalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LocationsRoute = LocationsRouteImport.update({
-  id: '/locations',
-  path: '/locations',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OrderActionRoute = OrderActionRouteImport.update({
   id: '/order-action',
   path: '/order-action',
@@ -110,7 +104,6 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
-  '/locations': typeof LocationsRoute
   '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
@@ -127,7 +120,6 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
-  '/locations': typeof LocationsRoute
   '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
@@ -145,7 +137,6 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
-  '/locations': typeof LocationsRoute
   '/order-action': typeof OrderActionRoute
   '/services': typeof ServicesRoute
   '/track': typeof TrackRoute
@@ -164,7 +155,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
-    | '/locations'
     | '/order-action'
     | '/services'
     | '/track'
@@ -181,7 +171,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
-    | '/locations'
     | '/order-action'
     | '/services'
     | '/track'
@@ -198,7 +187,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/gallery'
-    | '/locations'
     | '/order-action'
     | '/services'
     | '/track'
@@ -216,7 +204,6 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
-  LocationsRoute: typeof LocationsRoute
   OrderActionRoute: typeof OrderActionRoute
   ServicesRoute: typeof ServicesRoute
   TrackRoute: typeof TrackRoute
@@ -283,13 +270,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/locations': {
-      id: '/locations'
-      path: '/locations'
-      fullPath: '/locations'
-      preLoaderRoute: typeof LocationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/order-action': {
       id: '/order-action'
       path: '/order-action'
@@ -344,7 +324,6 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
-  LocationsRoute: LocationsRoute,
   OrderActionRoute: OrderActionRoute,
   ServicesRoute: ServicesRoute,
   TrackRoute: TrackRoute,

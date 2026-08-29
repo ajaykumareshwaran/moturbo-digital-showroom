@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { LuxButton, Magnetic } from "@/components/lux";
@@ -28,75 +28,31 @@ export const Route = createFileRoute("/book")({
   component: BookPage,
 });
 
-const STEPS = ["Service", "Details"];
+const STEPS = ["Service", "Vehicle", "Slot", "Confirm"];
 const TIMES = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
-
-function getInputDate(date: Date) {
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
 
 function BookPage() {
   const { service: preset } = Route.useSearch();
   const { addBooking } = useStore();
   const [step, setStep] = useState(0);
-  const [selectedServices, setSelectedServices] = useState<string[]>(
-    preset ? [preset] : [SERVICES[0]!.slug],
-  );
+  const [service, setService] = useState(preset ?? SERVICES[0]!.slug);
   const [brand, setBrand] = useState(VEHICLE_BRANDS[0]!);
   const [model, setModel] = useState("");
-  const branch = BRANCHES[0]!.name;
-  const [date, setDate] = useState(getInputDate(new Date()));
+  const [branch, setBranch] = useState(BRANCHES[0]!.name);
+  const [date, setDate] = useState("");
   const [time, setTime] = useState(TIMES[2]!);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const chosen = SERVICES.find((s) => s.slug === selectedServices[0]) ?? SERVICES[0]!;
-  const serviceSummary = selectedServices.length
-    ? selectedServices.map((slug) => SERVICES.find((s) => s.slug === slug)?.name ?? slug).join(" + ")
-    : "Select a service";
-  const totalFrom = selectedServices.reduce((sum, slug) => {
-    const item = SERVICES.find((s) => s.slug === slug);
-    return sum + (item?.from ?? 0);
-  }, 0);
-  const today = getInputDate(new Date());
-  const maxDate = getInputDate(new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2));
-  const canNext = step === 0 ? selectedServices.length > 0 : model.trim().length > 1 && !!date && date >= today;
-
-  const validateBooking = () => {
-    const nextErrors: Record<string, string> = {};
-
-    if (name.trim().length < 2) nextErrors.name = "Please enter your full name.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) nextErrors.email = "Please enter a valid email.";
-    if (phone.replace(/\D/g, "").length < 10) nextErrors.phone = "Please enter a valid phone number.";
-    if (!model.trim()) nextErrors.model = "Please add your vehicle model.";
-    if (!date || date < today) nextErrors.date = "Please select today or a future date.";
-
-    setFieldErrors(nextErrors);
-    return nextErrors;
-  };
-
-  const toggleService = (slug: string) => {
-    setSelectedServices((current) => {
-      const exists = current.includes(slug);
-      return exists ? current.filter((item) => item !== slug) : [...current, slug];
-    });
-  };
+  const chosen = SERVICES.find((s) => s.slug === service) ?? SERVICES[0]!;
+  const canNext = step === 1 ? model.trim().length > 1 : step === 2 ? date !== "" : true;
 
   async function confirm() {
-    const nextErrors = validateBooking();
-    if (Object.keys(nextErrors).length > 0) {
-      const firstMessage = Object.values(nextErrors)[0] ?? "Please complete the required fields.";
-      toast.error(firstMessage);
-      return;
-    }
-
-    if (!date || date < today) {
-      toast.error("Please select today or a future date");
+    if (!name.trim() || !email.trim() || !phone.trim()) {
+      toast.error("Please add your name, email and phone");
       return;
     }
 
@@ -105,13 +61,13 @@ function BookPage() {
     try {
       const result = await createBooking({
         data: {
-          service: serviceSummary,
-          packageName: serviceSummary,
+          service: chosen.name,
+          packageName: chosen.name,
           vehicle: `${brand} ${model}`,
           branch,
           date,
           time,
-          total: totalFrom,
+          total: chosen.from,
           customerName: name,
           customerEmail: email,
           customerPhone: phone,
@@ -121,13 +77,13 @@ function BookPage() {
       const created = addBooking({
         id: result.bookingCode,
         status: "Confirmed",
-        service: serviceSummary,
-        package: serviceSummary,
+        service: chosen.name,
+        package: chosen.name,
         vehicle: `${brand} ${model}`,
         branch,
         date,
         time,
-        total: totalFrom,
+        total: chosen.from,
       });
 
       setDone(created.id);
@@ -204,41 +160,28 @@ function BookPage() {
                 >
                   {step === 0 && (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {SERVICES.map((s) => {
-                        const selected = selectedServices.includes(s.slug);
-
-                        return (
-                          <button
-                            key={s.slug}
-                            type="button"
-                            onClick={() => toggleService(s.slug)}
-                            className={cn(
-                              "rounded-2xl border p-5 text-left transition-all",
-                              selected
-                                ? "border-gold/50 bg-gold/5"
-                                : "border-white/10 hover:border-white/25",
-                            )}
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="font-display text-sm font-semibold">{s.name}</div>
-                              {selected && <Sparkles className="size-4 text-gold" />}
-                            </div>
-                            <div className="mt-1.5 text-[0.65rem] text-muted-foreground">
-                              {s.duration} · from {currency(s.from)}
-                            </div>
-                          </button>
-                        );
-                      })}
+                      {SERVICES.map((s) => (
+                        <button
+                          key={s.slug}
+                          onClick={() => setService(s.slug)}
+                          className={cn(
+                            "rounded-2xl border p-5 text-left transition-all",
+                            service === s.slug
+                              ? "border-gold/50 bg-gold/5"
+                              : "border-white/10 hover:border-white/25",
+                          )}
+                        >
+                          <div className="font-display text-sm font-semibold">{s.name}</div>
+                          <div className="mt-1.5 text-[0.65rem] text-muted-foreground">
+                            {s.duration} · from {currency(s.from)}
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   )}
 
                   {step === 1 && (
                     <div className="space-y-6">
-                      <div className="rounded-2xl border border-gold/20 bg-gold/5 p-4 text-sm sm:p-5">
-                        <div className="text-[0.55rem] tracking-[0.22em] text-muted-foreground uppercase">Selected services</div>
-                        <div className="mt-2 font-display text-base font-semibold text-gold">{serviceSummary}</div>
-                      </div>
-
                       <Field label="Vehicle brand">
                         <select
                           value={brand}
@@ -255,28 +198,32 @@ function BookPage() {
                       <Field label="Model & year">
                         <input
                           value={model}
-                          onChange={(e) => {
-                            setModel(e.target.value);
-                            setFieldErrors((current) => ({ ...current, model: "" }));
-                          }}
+                          onChange={(e) => setModel(e.target.value)}
                           placeholder="911 Turbo S, 2023"
-                          className={cn("input-lux", fieldErrors.model && "border-red-500/80")}
+                          className="input-lux"
                         />
-                        {fieldErrors.model && <p className="mt-2 text-xs text-red-300">{fieldErrors.model}</p>}
                       </Field>
-                      <Field label="Preferred date">
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-6">
+                      <Field label="Studio">
+                        <select value={branch} onChange={(e) => setBranch(e.target.value)} className="input-lux">
+                          {BRANCHES.map((b) => (
+                            <option key={b.name} value={b.name} className="bg-noir">
+                              {b.name} — {b.address}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Date">
                         <input
                           type="date"
                           value={date}
-                          min={today}
-                          max={maxDate}
-                          onChange={(e) => {
-                            setDate(e.target.value);
-                            setFieldErrors((current) => ({ ...current, date: "" }));
-                          }}
-                          className={cn("input-lux", fieldErrors.date && "border-red-500/80")}
+                          onChange={(e) => setDate(e.target.value)}
+                          className="input-lux"
                         />
-                        {fieldErrors.date && <p className="mt-2 text-xs text-red-300">{fieldErrors.date}</p>}
                       </Field>
                       <Field label="Time slot">
                         <div className="flex flex-wrap gap-2">
@@ -294,46 +241,31 @@ function BookPage() {
                           ))}
                         </div>
                       </Field>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-6">
                       <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6 text-sm">
-                        <div className="font-display text-base font-semibold text-gold">{serviceSummary}</div>
+                        <div className="font-display text-base font-semibold text-gold">{chosen.name}</div>
                         <div className="mt-2 text-xs text-muted-foreground">
                           {brand} {model || "—"} · {branch} · {date || "select a date"} at {time}
                         </div>
-                        <div className="mt-3 font-display text-sm">From {currency(totalFrom)}</div>
+                        <div className="mt-3 font-display text-sm">From {currency(chosen.from)}</div>
                       </div>
                       <Field label="Full name">
-                        <input
-                          value={name}
-                          onChange={(e) => {
-                            setName(e.target.value);
-                            setFieldErrors((current) => ({ ...current, name: "" }));
-                          }}
-                          className={cn("input-lux", fieldErrors.name && "border-red-500/80")}
-                        />
-                        {fieldErrors.name && <p className="mt-2 text-xs text-red-300">{fieldErrors.name}</p>}
+                        <input value={name} onChange={(e) => setName(e.target.value)} className="input-lux" />
                       </Field>
                       <Field label="Email">
                         <input
                           type="email"
                           value={email}
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            setFieldErrors((current) => ({ ...current, email: "" }));
-                          }}
-                          className={cn("input-lux", fieldErrors.email && "border-red-500/80")}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="input-lux"
                         />
-                        {fieldErrors.email && <p className="mt-2 text-xs text-red-300">{fieldErrors.email}</p>}
                       </Field>
                       <Field label="Phone">
-                        <input
-                          value={phone}
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                            setFieldErrors((current) => ({ ...current, phone: "" }));
-                          }}
-                          className={cn("input-lux", fieldErrors.phone && "border-red-500/80")}
-                        />
-                        {fieldErrors.phone && <p className="mt-2 text-xs text-red-300">{fieldErrors.phone}</p>}
+                        <input value={phone} onChange={(e) => setPhone(e.target.value)} className="input-lux" />
                       </Field>
                     </div>
                   )}
@@ -349,15 +281,12 @@ function BookPage() {
                   <ChevronLeft className="size-3.5" /> Back
                 </button>
                 <Magnetic>
-                  {step === 1 ? (
-                    <LuxButton
-                      onClick={confirm}
-                      disabled={!selectedServices.length || !name || !email || !phone || !model.trim() || !date || date < today || isSubmitting}
-                    >
+                  {step === 3 ? (
+                    <LuxButton onClick={confirm} disabled={!name || !email || !phone || isSubmitting}>
                       {isSubmitting ? "Confirming..." : "Confirm reservation"}
                     </LuxButton>
                   ) : (
-                    <LuxButton onClick={() => { if (canNext) { setFieldErrors({}); setStep((s) => s + 1); }}} disabled={!canNext}>
+                    <LuxButton onClick={() => canNext && setStep((s) => s + 1)} disabled={!canNext}>
                       Continue <ChevronRight className="size-3.5" />
                     </LuxButton>
                   )}
