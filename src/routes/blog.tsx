@@ -24,8 +24,7 @@ const POSTS = [
     title: "Why graphene changed our coating bay",
     tag: "Coatings",
     read: "6 min",
-    image:
-      "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1200&q=80",
+    image: "/Why graphene changed our coating bay.png",
     excerpt:
       "Graphene top coats changed how we measure slickness and durability across Bangalore’s heat cycles.",
     notes: [
@@ -38,8 +37,7 @@ const POSTS = [
     title: "Paint depth mapping, explained",
     tag: "Craft",
     read: "4 min",
-    image:
-      "https://images.unsplash.com/photo-1585759296443-c5f1f3c0c2bb?auto=format&fit=crop&w=1200&q=80",
+    image: "/Paint depth mapping, explained.png",
     excerpt:
       "The right correction plan begins with the paint itself, not just the polishing pads we reach for.",
     notes: [
@@ -52,8 +50,7 @@ const POSTS = [
     title: "Self-healing film in real climates",
     tag: "Protection",
     read: "7 min",
-    image:
-      "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=1200&q=80",
+    image: "/Self-healing film in real climates.png",
     excerpt:
       "PPF works best when the film, surface prep and installation environment all respect one another.",
     notes: [
@@ -66,8 +63,7 @@ const POSTS = [
     title: "The two-bucket ritual, refined",
     tag: "Care",
     read: "3 min",
-    image:
-      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=1200&q=80",
+    image: "/The two-bucket ritual, refined.png",
     excerpt:
       "The bucket routine sounds simple, but the sequence determines whether the finish stays clean or turns into micro-marring.",
     notes: [
@@ -80,8 +76,7 @@ const POSTS = [
     title: "Satin wraps: living with the finish",
     tag: "Wrapping",
     read: "5 min",
-    image:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+    image: "/Satin wraps living with the finish.png",
     excerpt:
       "A satin finish is not just a colour choice; it is a daily maintenance philosophy and a design signature.",
     notes: [
@@ -94,8 +89,7 @@ const POSTS = [
     title: "Interior leather without the shine",
     tag: "Interior",
     read: "4 min",
-    image:
-      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80",
+    image: "/Interior leather without the shine.png",
     excerpt:
       "A refined cabin should feel tactile, not greasy. That is why we treat leather with restraint and precision.",
     notes: [
