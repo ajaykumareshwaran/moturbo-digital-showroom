@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, lazy, Suspense, useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown, Gem, GaugeCircle, Shield, Star, Wrench } from "lucide-react";
 import { LuxLink, Magnetic, Reveal, SectionHeading, TiltCard } from "@/components/lux";
@@ -84,6 +85,7 @@ function Index() {
   const stageRef = useRef<HTMLElement | null>(null);
   const featured = PRODUCTS.slice(0, 6);
   const [shouldLoadShowroom, setShouldLoadShowroom] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -204,11 +206,17 @@ function Index() {
                   EXPLORE SHOP <ArrowRight className="size-3.5" />
                 </LuxLink>
               </Magnetic>
-              <Magnetic>
+              {isMobile ? (
                 <LuxLink to="/locations">
                   GET DIRECTIONS <ArrowRight className="size-3.5" />
                 </LuxLink>
-              </Magnetic>
+              ) : (
+                <Magnetic>
+                  <LuxLink to="/locations">
+                    GET DIRECTIONS <ArrowRight className="size-3.5" />
+                  </LuxLink>
+                </Magnetic>
+              )}
             </div>
           </motion.div>
 
