@@ -51,7 +51,21 @@ function ProductPage() {
         <div className="grid gap-12 lg:grid-cols-2">
           <Reveal>
             <TiltCard className="glass lux-border h-[520px] overflow-hidden rounded-[2rem]" intensity={14}>
-              <ProductOrb hue={product.hue} />
+              {product.image ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.parentElement?.querySelector("div[data-fallback]")?.classList.remove("hidden");
+                  }}
+                />
+              ) : null}
+              <div data-fallback className={cn("absolute inset-0 hidden", !product.image && "block")}>
+                <ProductOrb hue={product.hue} />
+              </div>
+              {!product.image && <ProductOrb hue={product.hue} />}
             </TiltCard>
           </Reveal>
 

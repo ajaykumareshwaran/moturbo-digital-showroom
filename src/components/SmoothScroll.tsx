@@ -9,15 +9,23 @@ export function SmoothScroll() {
 
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (isCoarsePointer || prefersReducedMotion) {
+    const lowPowerDevice =
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 6) ||
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory <= 4 ||
+      Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+
+    if (isCoarsePointer || prefersReducedMotion || lowPowerDevice) {
       return;
     }
 
     let destroy: (() => void) | undefined;
     let cancelled = false;
 
-    // Defer Lenis initialization until after first paint
-    const timeoutId = setTimeout(() => {
+    const initSmoothScroll = () => {
+      if (cancelled || document.visibilityState === "hidden") {
+        return;
+      }
+
       void (async () => {
         const gsapModule = await import("gsap");
         const scrollTriggerModule = await import("gsap/ScrollTrigger");
@@ -48,18 +56,18 @@ export function SmoothScroll() {
         gsapApi.registerPlugin(scrollTriggerApi);
 
         const lenis = new Lenis({
-          duration: 1.0,
+          duration: 0.9,
           smoothWheel: true,
-          lerp: 0.04,
-          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          wheelMultiplier: 0.75,
+          lerp: 0.06,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -9 * t)),
+          wheelMultiplier: 0.7,
         });
         (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
         lenis.on("scroll", scrollTriggerApi.update);
         const raf = (time: number) => lenis.raf(time * 1000);
         gsapApi.ticker.add(raf);
-        gsapApi.ticker.lagSmoothing(0);
+        gsapApi.ticker.lagSmoothing(100);
 
         destroy = () => {
           gsapApi.ticker.remove(raf);
@@ -67,11 +75,29 @@ export function SmoothScroll() {
           scrollTriggerApi.getAll().forEach((trigger) => trigger.kill());
         };
       })();
-    }, 100);
+    };
+
+    const startAfterIdle =
+      "requestIdleCallback" in window
+        ? window.requestIdleCallback(initSmoothScroll)
+        : window.setTimeout(initSmoothScroll, 150);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        initSmoothScroll();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility, { passive: true });
 
     return () => {
       cancelled = true;
-      clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if ("cancelIdleCallback" in window && typeof startAfterIdle === "number") {
+        window.cancelIdleCallback(startAfterIdle);
+      }
+      if (typeof startAfterIdle === "number") {
+        window.clearTimeout(startAfterIdle);
+      }
       destroy?.();
     };
   }, []);

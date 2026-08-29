@@ -582,6 +582,19 @@ function AccessoryWorkroomNiche({ animate }: { animate: boolean }) {
 function CenterCinematicWallDisplay({ animate }: { animate: boolean }) {
   const sweepRef = useRef<THREE.Mesh>(null);
   const showroomPhoto = useTexture("/showroom-bg.jpg");
+  const [photoReady, setPhotoReady] = useState(false);
+
+  useEffect(() => {
+    const image = (showroomPhoto as THREE.Texture & { image?: HTMLImageElement | ImageData }).image;
+    if (image && (image as HTMLImageElement).width && (image as HTMLImageElement).height) {
+      setPhotoReady(true);
+      return;
+    }
+
+    const handleReady = () => setPhotoReady(true);
+    showroomPhoto.addEventListener("update", handleReady);
+    return () => showroomPhoto.removeEventListener("update", handleReady);
+  }, [showroomPhoto]);
 
   useMemo(() => {
     showroomPhoto.colorSpace = THREE.SRGBColorSpace;
@@ -655,11 +668,16 @@ function CenterCinematicWallDisplay({ animate }: { animate: boolean }) {
       </mesh>
       <mesh position={[0, 0.01, 0.1]}>
         <planeGeometry args={[8.0, 1.95]} />
-        <meshBasicMaterial map={showroomPhoto} toneMapped={false} />
+        <meshBasicMaterial
+          map={showroomPhoto}
+          transparent
+          opacity={photoReady ? 1 : 0}
+          toneMapped={false}
+        />
       </mesh>
       <mesh position={[0, 0.01, 0.105]}>
         <planeGeometry args={[8.0, 1.95]} />
-        <meshBasicMaterial color="#11131e" transparent opacity={0.16} toneMapped={false} />
+        <meshBasicMaterial color="#11131e" transparent opacity={photoReady ? 0.16 : 0} toneMapped={false} />
       </mesh>
 
       {/* Smoke and reflection sweep */}
@@ -774,8 +792,7 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
         decay={2}
       />}
 
-      {animate && (
-      <group ref={floatRef}>
+      <group ref={animate ? floatRef : undefined}>
         {variant === 0 ? (
           <>
             <group position={[side * 0.11, -0.88, -0.44]} rotation={[Math.PI / 2, 0, 0]}>
@@ -870,7 +887,6 @@ function SideAccessoryRack({ x, z, seed, animate }: { x: number; z: number; seed
           <meshStandardMaterial color="#111118" roughness={0.3} metalness={0.52} />
         </mesh>
       </group>
-      )}
     </group>
   );
 }
