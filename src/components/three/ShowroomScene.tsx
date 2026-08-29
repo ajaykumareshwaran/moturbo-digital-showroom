@@ -1098,8 +1098,8 @@ function Showroom({ highQuality, tier, floatAnimations, reflectorEnabled, reflec
         )),
       )}
 
-      {/* accessory display wall (right) — skipped on mobile; saves ~80 draw calls */}
-      {floatAnimations && Array.from({ length: 12 }).map((_, i) => {
+      {/* accessory display wall (right) — kept visible on mobile as a static rack when motion is reduced */}
+      {Array.from({ length: 12 }).map((_, i) => {
         const y = 1.4 + (i % 3) * 1.3;
         const z = 8 + Math.floor(i / 3) * 2.2;
         const toneA = productTones[i % productTones.length]!;
