@@ -18,6 +18,8 @@ export type Product = {
 
 export function optimizeImageUrl(url: string, width: number) {
   if (!url) return url;
+  // Local public-folder images don't need CDN query params
+  if (url.startsWith("/")) return url;
 
   const normalized = url
     .replace(/([?&])w=\d+/g, "")
@@ -33,28 +35,30 @@ export function optimizeImageUrl(url: string, width: number) {
 }
 
 export function optimizeImageSrcSet(url: string) {
+  // Local images are served as-is; no responsive CDN srcSet needed
+  if (!url || url.startsWith("/")) return "";
   return [400, 800, 1200]
     .map((width) => `${optimizeImageUrl(url, width)} ${width}w`)
     .join(", ");
 }
 
 const PRODUCT_IMAGES: Record<string, string> = {
-  "noir-elixir-perfume": "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1000&q=80",
-  "workroom-cleaning-kit": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&w=1000&q=80",
-  "ceramic-9h-coating": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1000&q=80",
-  "turbo-pressure-washer": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1000&q=80",
-  "gold-foam-cannon": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=80",
-  "silk-microfiber-towel": "https://images.unsplash.com/photo-1585759296443-c5f1f3c0c2bb?auto=format&fit=crop&w=1000&q=80",
-  "cyclone-vacuum": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=80",
-  "interior-cleaner-pro": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1000&q=80",
-  "dashboard-polish": "https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=1000&q=80",
-  "wheel-cleaner-acid-free": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1000&q=80",
-  "orbital-polisher-15": "https://images.unsplash.com/photo-1581141159553-8fca7891d7b9?auto=format&fit=crop&w=1000&q=80",
-  "air-freshener-crystal": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=1000&q=80",
-  "ppf-care-accessory-kit": "https://images.unsplash.com/photo-1528742795480-7f2fc7b2c6f1?auto=format&fit=crop&w=1000&q=80",
-  "graphene-sealant": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1000&q=80",
-  "leather-balm": "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=1000&q=80",
-  "glass-coat-rain": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1000&q=80",
+  "noir-elixir-perfume": "/Noir Élixir Car Perfume.png",
+  "workroom-cleaning-kit": "/Workroom Cleaning Kit.png",
+  "ceramic-9h-coating": "/Ceramic 9H Coating Kit.png",
+  "turbo-pressure-washer": "/Turbo Pressure Washer 180.png",
+  "gold-foam-cannon": "/Gold Foam Cannon.png",
+  "silk-microfiber-towel": "/Silk Microfiber Towel Set.png",
+  "cyclone-vacuum": "/Cyclone Studio Vacuum.png",
+  "interior-cleaner-pro": "/Interior Cleaner Pro.png",
+  "dashboard-polish": "/Dashboard Satin Polish.png",
+  "wheel-cleaner-acid-free": "/Wheel Cleaner Acid-Free.png",
+  "orbital-polisher-15": "/Orbital Polisher DA15.png",
+  "air-freshener-crystal": "/Crystal Air Diffuser.png",
+  "ppf-care-accessory-kit": "/PPF Care Accessory Kit.png",
+  "graphene-sealant": "/Graphene Sealant 12M.png",
+  "leather-balm": "/Nappa Leather Balm.png",
+  "glass-coat-rain": "/Glass Coat Rain Repel.png",
 };
 
 const mk = (
